@@ -14,11 +14,14 @@ export const handlers = [
   http.get('/api/children/:childId/report/weekly', ({ params }) => {
     const { childId } = params
     const childPosts = postsByChild(String(childId))
-    const weekly = childPosts.slice(0, 7).reverse().map((post, i) => ({
-      week: `${i + 1}주차`,
-      errorCount: post.errorCount,
-      lowConfidenceCount: post.lowConfidenceCount,
-    }))
+    const weekly = childPosts
+      .slice(0, 7)
+      .reverse()
+      .map((post, i) => ({
+        week: `${i + 1}주차`,
+        errorCount: post.errorCount,
+        lowConfidenceCount: post.lowConfidenceCount,
+      }))
     return HttpResponse.json(weekly)
   }),
 
