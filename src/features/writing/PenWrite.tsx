@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { PenCanvas, type Stroke } from '../../lib/pen/PenCanvas'
+import { Redo2, Undo2 } from 'lucide-react'
+import { PenCanvas, type PenTool, type Stroke } from '../../lib/pen/PenCanvas'
 import { useWritingStore } from '../../stores/writingStore'
 
 export function PenWrite() {
@@ -10,7 +11,40 @@ export function PenWrite() {
   const mode = useWritingStore((s) => s.mode)
   const setContent = useWritingStore((s) => s.setContent)
   const [strokes, setStrokes] = useState<Stroke[]>([])
+  const [history, setHistory] = useState<Stroke[][]>([])
+  const [future, setFuture] = useState<Stroke[][]>([])
   const [livePoints, setLivePoints] = useState<Stroke>([])
+  const [tool, setTool] = useState<PenTool>('pen')
+  const [stylusOnly, setStylusOnly] = useState(true)
+
+  // 그리기·지우개 모두 이 경로로 strokes를 바꿔서, 배열 스냅샷 하나 = 되돌리기 한 단계가 되게 한다.
+  function commitStrokes(next: Stroke[]) {
+    setHistory((h) => [...h, strokes])
+    setStrokes(next)
+    setFuture([])
+  }
+
+  function undo() {
+    if (history.length === 0) return
+    const previous = history[history.length - 1]
+    setFuture((f) => [strokes, ...f])
+    setHistory((h) => h.slice(0, -1))
+    setStrokes(previous)
+  }
+
+  function redo() {
+    if (future.length === 0) return
+    const [next, ...rest] = future
+    setHistory((h) => [...h, strokes])
+    setFuture(rest)
+    setStrokes(next)
+  }
+
+  function clearAll() {
+    setStrokes([])
+    setHistory([])
+    setFuture([])
+  }
 
   const ocrMutation = useMutation({
     mutationFn: async (strokeCount: number): Promise<{ text: string }> => {
@@ -42,18 +76,88 @@ export function PenWrite() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
         <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="flex flex-wrap shrink-0 items-center gap-2">
+            <div className="flex shrink-0 gap-1 rounded-xl border border-ink/10 p-1">
+              <button
+                type="button"
+                onClick={() => setTool('pen')}
+                className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
+                  tool === 'pen' ? 'bg-brand text-white' : 'text-ink/70'
+                }`}
+              >
+                펜
+              </button>
+              <button
+                type="button"
+                onClick={() => setTool('eraser')}
+                className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
+                  tool === 'eraser' ? 'bg-brand text-white' : 'text-ink/70'
+                }`}
+              >
+                지우개
+              </button>
+            </div>
+            <div className="flex shrink-0 gap-2 sm:ml-auto">
+              <button
+                type="button"
+                onClick={undo}
+                disabled={history.length === 0}
+                aria-label="되돌리기"
+                title="되돌리기"
+                className="flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl border border-ink/10 disabled:opacity-40"
+              >
+                <Undo2 className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={redo}
+                disabled={future.length === 0}
+                aria-label="다시하기"
+                title="다시하기"
+                className="flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl border border-ink/10 disabled:opacity-40"
+              >
+                <Redo2 className="size-5" />
+              </button>
+            </div>
+          </div>
+
+          <label className="flex shrink-0 items-center gap-2 text-sm text-ink/70">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={stylusOnly}
+              onClick={() => setStylusOnly((v) => !v)}
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+                stylusOnly ? 'bg-brand' : 'bg-ink/20'
+              }`}
+            >
+              <span
+                className={`absolute left-0.5 top-0.5 size-6 rounded-full bg-white shadow transition-transform ${
+                  stylusOnly ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            스타일러스 전용 (손가락 입력 무시)
+          </label>
+
           <div className="min-h-0 flex-1">
-            <PenCanvas strokes={strokes} onStrokesChange={setStrokes} onLiveStrokeChange={setLivePoints} />
+            <PenCanvas
+              strokes={strokes}
+              onStrokesChange={commitStrokes}
+              onLiveStrokeChange={setLivePoints}
+              tool={tool}
+              stylusOnly={stylusOnly}
+            />
           </div>
 
           <div className="flex shrink-0 gap-3">
             <button
               type="button"
-              onClick={() => setStrokes([])}
+              onClick={clearAll}
               disabled={strokes.length === 0}
               className="min-h-touch flex-1 rounded-xl border border-ink/10 px-6 text-body disabled:opacity-40"
             >
-              지우기
+              전체 지우기
             </button>
             <button
               type="button"
