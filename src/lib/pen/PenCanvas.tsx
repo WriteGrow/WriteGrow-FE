@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getStroke } from 'perfect-freehand'
 
 export type Stroke = number[][] // [x, y, pressure][]
@@ -29,13 +29,19 @@ function getSvgPathFromStroke(stroke: number[][]): string {
 export function PenCanvas({
   strokes,
   onStrokesChange,
+  onLiveStrokeChange,
 }: {
   strokes: Stroke[]
   onStrokesChange: (strokes: Stroke[]) => void
+  onLiveStrokeChange?: (points: Stroke) => void
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [current, setCurrent] = useState<Stroke>([])
   const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null)
+
+  useEffect(() => {
+    onLiveStrokeChange?.(current)
+  }, [current, onLiveStrokeChange])
 
   function toLocal(e: ReactPointerEvent<SVGSVGElement>): [number, number] {
     const rect = svgRef.current!.getBoundingClientRect()
@@ -67,11 +73,10 @@ export function PenCanvas({
   const visibleStrokes = current.length ? [...strokes, current] : strokes
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col gap-2">
       <svg
         ref={svgRef}
-        className="w-full touch-none rounded-xl border border-ink/10 bg-white"
-        style={{ aspectRatio: '4 / 3' }}
+        className="min-h-0 w-full flex-1 touch-none rounded-xl border border-ink/10 bg-white"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -82,7 +87,7 @@ export function PenCanvas({
         ))}
       </svg>
       {import.meta.env.DEV && diagnostic && (
-        <p className="mt-2 text-sm text-ink/60">
+        <p className="shrink-0 text-sm text-ink/60">
           압력 {diagnostic.pressure.toFixed(2)} · 기울기 ({diagnostic.tiltX}, {diagnostic.tiltY}) ·{' '}
           {diagnostic.pointerType}
         </p>
