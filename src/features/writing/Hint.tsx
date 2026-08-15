@@ -15,11 +15,6 @@ export function Hint() {
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle')
 
   useEffect(() => {
-    setAnswer('')
-    setFeedback('idle')
-  }, [hintIndex])
-
-  useEffect(() => {
     if (errors.length === 0 || hintIndex >= errors.length) {
       navigate('/child/write/result', { replace: true })
     }
@@ -43,9 +38,12 @@ export function Hint() {
   function goNext() {
     if (hintIndex + 1 >= errors.length) {
       navigate('/child/write/result')
-    } else {
-      nextError()
+      return
     }
+    // 다음 오류로 넘어갈 때 입력과 판정을 여기서 함께 되돌린다.
+    setAnswer('')
+    setFeedback('idle')
+    nextError()
   }
 
   return (
