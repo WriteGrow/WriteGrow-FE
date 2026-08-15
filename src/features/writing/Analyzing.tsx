@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { DEV_CHILD_ID } from '../../lib/devChild'
@@ -36,10 +36,15 @@ export function Analyzing() {
     },
   })
 
+  // mutation 상태(isIdle)는 첫 렌더 클로저에 고정돼 재실행을 막지 못한다.
+  // StrictMode의 이중 마운트는 같은 인스턴스에서 일어나므로 ref로 1회 실행을 보장한다.
+  const startedRef = useRef(false)
+
   useEffect(() => {
-    if (topic && mode && content && analyzeFlow.isIdle) {
-      analyzeFlow.mutate()
-    }
+    if (startedRef.current) return
+    if (!topic || !mode || !content) return
+    startedRef.current = true
+    analyzeFlow.mutate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
