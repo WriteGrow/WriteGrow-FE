@@ -410,3 +410,107 @@ export const parentPostDetails: Record<string, ParentPostDetail> = {
 export function parentPostById(postId: string): ParentPostDetail | undefined {
   return parentPostDetails[postId]
 }
+
+export interface ReviewCandidate {
+  id: string
+  label: string
+  originalText: string
+  aiAnalysis: string
+  lowConfidenceReason: string
+  before: string
+  after: string
+}
+
+export interface ParentReviewData {
+  childId: string
+  reviewTargetCount: number
+  confirmedErrorCount: number
+  autoApplied: boolean
+  candidates: ReviewCandidate[]
+}
+
+export const parentReviews: Record<string, ParentReviewData> = {
+  'child-1': {
+    childId: 'child-1',
+    reviewTargetCount: 4,
+    confirmedErrorCount: 12,
+    autoApplied: false,
+    candidates: [
+      {
+        id: 'review-1',
+        label: '후보 1',
+        originalText: '나는 학교에 갔다가 집에왔다.',
+        aiAnalysis: '띄어쓰기 오류로 보이며 "집에 왔다"로 수정하는 것이 자연스럽습니다.',
+        lowConfidenceReason: '구어체 표현일 수 있어 의도 판단이 불분명합니다.',
+        before: '집에왔다',
+        after: '집에 왔다',
+      },
+      {
+        id: 'review-2',
+        label: '후보 2',
+        originalText: '우리 강아지는 되게 귀엽고 활발해요.',
+        aiAnalysis: '구어체 표현 "되게"를 표준어 "매우"로 바꾸는 것이 더 자연스러울 수 있습니다.',
+        lowConfidenceReason: '아동의 자연스러운 구어체일 수 있어 교정 필요 여부가 불분명합니다.',
+        before: '되게',
+        after: '매우',
+      },
+      {
+        id: 'review-3',
+        label: '후보 3',
+        originalText: '밥을먹고 숙제를 했어요.',
+        aiAnalysis: '띄어쓰기 오류로 보이며 "밥을 먹고"로 수정하는 것이 맞습니다.',
+        lowConfidenceReason: '필기·OCR 인식 오류 가능성도 있어 확신도가 낮습니다.',
+        before: '밥을먹고',
+        after: '밥을 먹고',
+      },
+      {
+        id: 'review-4',
+        label: '후보 4',
+        originalText: '친구한테 선물을 줬는데 친구가 좋아했어요.',
+        aiAnalysis: '조사 "한테"를 더 표준적인 "에게"로 바꾸는 것을 제안합니다.',
+        lowConfidenceReason: '구어체 조사 사용이 자연스러울 수 있어 교정 필요성이 애매합니다.',
+        before: '친구한테',
+        after: '친구에게',
+      },
+    ],
+  },
+  'child-2': {
+    childId: 'child-2',
+    reviewTargetCount: 3,
+    confirmedErrorCount: 5,
+    autoApplied: false,
+    candidates: [
+      {
+        id: 'review-c2-1',
+        label: '후보 1',
+        originalText: '그림그리는게 제일 재미있어요.',
+        aiAnalysis: '띄어쓰기를 "그림 그리는 게"로 나누는 것이 자연스럽습니다.',
+        lowConfidenceReason: '아동 문체상 붙여 쓴 표현일 수 있어 확신도가 낮습니다.',
+        before: '그림그리는게',
+        after: '그림 그리는 게',
+      },
+      {
+        id: 'review-c2-2',
+        label: '후보 2',
+        originalText: '색깔을 섞으면 새로운색이 나와요.',
+        aiAnalysis: '"새로운 색이"로 띄어 쓰는 것이 맞습니다.',
+        lowConfidenceReason: 'OCR로 공백이 누락됐을 가능성도 있습니다.',
+        before: '새로운색이',
+        after: '새로운 색이',
+      },
+      {
+        id: 'review-c2-3',
+        label: '후보 3',
+        originalText: '오늘은 진짜 기분이 좋았다.',
+        aiAnalysis: '구어체 "진짜"를 "정말"로 바꾸는 것을 제안합니다.',
+        lowConfidenceReason: '자연스러운 아동 표현일 수 있어 교정 여부가 불분명합니다.',
+        before: '진짜',
+        after: '정말',
+      },
+    ],
+  },
+}
+
+export function parentReviewByChild(childId: string): ParentReviewData | undefined {
+  return parentReviews[childId]
+}

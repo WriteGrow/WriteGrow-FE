@@ -4,6 +4,7 @@ import {
   errorsByPost,
   parentHomeSummaries,
   parentPostById,
+  parentReviewByChild,
   postsByChild,
   weeklyReportByChild,
 } from './seed'
@@ -34,6 +35,12 @@ export const handlers = [
       return new HttpResponse(null, { status: 404 })
     }
     return HttpResponse.json(detail)
+  }),
+
+  http.get('/api/children/:childId/review', ({ params }) => {
+    const review = parentReviewByChild(String(params.childId))
+    if (!review) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(review)
   }),
 
   http.get('/api/posts/:postId/errors', ({ params }) => {

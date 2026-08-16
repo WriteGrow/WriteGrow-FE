@@ -34,7 +34,7 @@ export function ParentPost() {
       <div className="flex justify-end">
         <Link
           to={`/parent/children/${childId}/report`}
-          className="rounded-[5px] border border-black/15 bg-white px-4 py-2 text-[12px] text-black font-semibold hover:bg-black/5"
+          className="rounded-[5px] border border-black/15 bg-white px-4 py-2 text-[12px] text-black hover:bg-black/5"
         >
           주간 성장 리포트로 돌아가기
         </Link>
