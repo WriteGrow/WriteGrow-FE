@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ParentChildSummary } from '../../mocks/seed'
-import { ActivityCard } from './ActivityCard'
-import { ErrorStats } from './ErrorStats'
-import { FocusGuidance } from './FocusGuidance'
+import { ActivityCard } from './parent-home/ActivityCard'
+import { ErrorStats } from './parent-home/ErrorStats'
+import { FocusGuidance } from './parent-home/FocusGuidance'
 
 export function ParentHome() {
   const {

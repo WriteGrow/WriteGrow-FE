@@ -4,6 +4,7 @@ import { ChildLayout } from '../components/ui/ChildLayout'
 import { ParentLayout } from '../components/ui/ParentLayout'
 import { ChildHome } from '../features/writing/ChildHome'
 import { ParentHome } from '../features/report/ParentHome'
+import { ParentReport } from '../features/report/ParentReport'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/child" replace /> },
@@ -23,6 +24,16 @@ export const router = createBrowserRouter([
       <RoleGuard allow="parent">
         <ParentLayout>
           <ParentHome />
+        </ParentLayout>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/report',
+    element: (
+      <RoleGuard allow="parent">
+        <ParentLayout>
+          <ParentReport />
         </ParentLayout>
       </RoleGuard>
     ),

@@ -1,4 +1,4 @@
-import type { ParentChildSummary } from '../../mocks/seed'
+import type { ParentChildSummary } from '../../../mocks/seed'
 
 function errorDeltaLabel(delta: number) {
   if (delta < 0) return `↓ ${Math.abs(delta)}건 감소`
