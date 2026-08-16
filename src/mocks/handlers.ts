@@ -1,5 +1,11 @@
 import { http, HttpResponse } from 'msw'
-import { children, errorsByPost, parentHomeSummaries, postsByChild } from './seed'
+import {
+  children,
+  errorsByPost,
+  parentHomeSummaries,
+  postsByChild,
+  weeklyReportByChild,
+} from './seed'
 
 export const handlers = [
   http.get('/api/children', () => {
@@ -16,17 +22,9 @@ export const handlers = [
   }),
 
   http.get('/api/children/:childId/report/weekly', ({ params }) => {
-    const { childId } = params
-    const childPosts = postsByChild(String(childId))
-    const weekly = childPosts
-      .slice(0, 7)
-      .reverse()
-      .map((post, i) => ({
-        week: `${i + 1}주차`,
-        errorCount: post.errorCount,
-        lowConfidenceCount: post.lowConfidenceCount,
-      }))
-    return HttpResponse.json(weekly)
+    const report = weeklyReportByChild(String(params.childId))
+    if (!report) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(report)
   }),
 
   http.get('/api/posts/:postId/errors', ({ params }) => {

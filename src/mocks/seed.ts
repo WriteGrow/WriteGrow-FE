@@ -140,3 +140,143 @@ export const parentHomeSummaries: ParentChildSummary[] = [
       '조사와 어미 사용에서 같은 오류가 반복되고 있어요. 짧은 문장 쓰기를 격려해 보세요.',
   },
 ]
+
+export interface WeeklyTrendRow {
+  date: string
+  sentenceCount: number
+  errorCandidates: number
+  selfCorrections: number
+}
+
+export interface WeeklyPostRow {
+  postId: string
+  writtenAt: string
+  title: string
+  errorCount: number
+  selfCorrections: number
+  status: string
+}
+
+export interface ParentWeeklyReport {
+  childId: string
+  childName: string
+  postsThisWeek: number
+  postsGoal: number
+  selfCorrections: number
+  selfCorrectionDelta: number
+  repeatedErrorTypeCount: number
+  repeatedErrorFocus: string
+  lowConfidencePending: number
+  majorRepeatedErrors: string[]
+  correctionTarget: number
+  correctionDone: number
+  cumulativeSelfCorrections: number
+  trends: WeeklyTrendRow[]
+  focusAreaTitle: string
+  focusAreaDescription: string
+  guidanceTitle: string
+  guidanceDescription: string
+  posts: WeeklyPostRow[]
+}
+
+export const parentWeeklyReports: Record<string, ParentWeeklyReport> = {
+  'child-1': {
+    childId: 'child-1',
+    childName: '김민준',
+    postsThisWeek: 5,
+    postsGoal: 5,
+    selfCorrections: 3,
+    selfCorrectionDelta: 1,
+    repeatedErrorTypeCount: 4,
+    repeatedErrorFocus: '띄어쓰기·받침 중심',
+    lowConfidencePending: 2,
+    majorRepeatedErrors: ['띄어쓰기', '받침', '조사·어미', '어휘 표현'],
+    correctionTarget: 4,
+    correctionDone: 3,
+    cumulativeSelfCorrections: 12,
+    trends: [
+      { date: '8/10', sentenceCount: 6, errorCandidates: 3, selfCorrections: 1 },
+      { date: '8/11', sentenceCount: 8, errorCandidates: 4, selfCorrections: 2 },
+      { date: '8/12', sentenceCount: 5, errorCandidates: 2, selfCorrections: 1 },
+      { date: '8/13', sentenceCount: 7, errorCandidates: 3, selfCorrections: 2 },
+      { date: '8/14', sentenceCount: 9, errorCandidates: 2, selfCorrections: 2 },
+    ],
+    focusAreaTitle: '받침 표기',
+    focusAreaDescription:
+      '3주 연속 반복 오류로 확인되었습니다. 짧은 문장을 직접 읽어보는 활동을 권장합니다.',
+    guidanceTitle: '조사·어미 연결',
+    guidanceDescription: '자기교정 성공률이 낮아 추가 격려가 필요합니다.',
+    posts: [
+      {
+        postId: 'post-child-1-7',
+        writtenAt: '2026.08.14',
+        title: '친구와 함께한 놀이',
+        errorCount: 2,
+        selfCorrections: 1,
+        status: '교정 완료',
+      },
+      {
+        postId: 'post-child-1-6',
+        writtenAt: '2026.08.13',
+        title: '가장 기억에 남는 여행',
+        errorCount: 3,
+        selfCorrections: 2,
+        status: '교정 완료',
+      },
+      {
+        postId: 'post-child-1-5',
+        writtenAt: '2026.08.12',
+        title: '내가 좋아하는 동물',
+        errorCount: 1,
+        selfCorrections: 0,
+        status: '검토 대기',
+      },
+      {
+        postId: 'post-child-1-4',
+        writtenAt: '2026.08.11',
+        title: '주말에 가족과 한 일',
+        errorCount: 4,
+        selfCorrections: 2,
+        status: '교정 완료',
+      },
+    ],
+  },
+  'child-2': {
+    childId: 'child-2',
+    childName: '김서연',
+    postsThisWeek: 1,
+    postsGoal: 5,
+    selfCorrections: 0,
+    selfCorrectionDelta: -1,
+    repeatedErrorTypeCount: 2,
+    repeatedErrorFocus: '조사·어미·띄어쓰기',
+    lowConfidencePending: 3,
+    majorRepeatedErrors: ['조사·어미', '띄어쓰기'],
+    correctionTarget: 3,
+    correctionDone: 0,
+    cumulativeSelfCorrections: 5,
+    trends: [
+      { date: '8/12', sentenceCount: 4, errorCandidates: 5, selfCorrections: 0 },
+      { date: '8/14', sentenceCount: 6, errorCandidates: 4, selfCorrections: 0 },
+    ],
+    focusAreaTitle: '조사·어미 바르게 쓰기',
+    focusAreaDescription:
+      '조사와 어미 사용에서 같은 오류가 반복되고 있어요. 짧은 문장 쓰기를 격려해 보세요.',
+    guidanceTitle: '띄어쓰기 습관',
+    guidanceDescription: '작성량은 적지만 오류 밀도가 높아 함께 읽어보는 시간이 필요합니다.',
+    posts: [
+      {
+        postId: 'post-child-2-6',
+        writtenAt: '2026.08.14',
+        title: '그림 그리는 게 재미있다',
+        errorCount: 7,
+        selfCorrections: 0,
+        status: '검토 대기',
+      },
+    ],
+  },
+}
+
+export function weeklyReportByChild(childId: string): ParentWeeklyReport | undefined {
+  return parentWeeklyReports[childId]
+}
