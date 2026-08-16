@@ -1,9 +1,13 @@
 import { http, HttpResponse } from 'msw'
-import { children, errorsByPost, postsByChild } from './seed'
+import { children, errorsByPost, parentHomeSummaries, postsByChild } from './seed'
 
 export const handlers = [
   http.get('/api/children', () => {
     return HttpResponse.json(children)
+  }),
+
+  http.get('/api/parent/home', () => {
+    return HttpResponse.json(parentHomeSummaries)
   }),
 
   http.get('/api/children/:childId/posts', ({ params }) => {
