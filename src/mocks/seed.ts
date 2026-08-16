@@ -10,8 +10,8 @@ export interface ErrorItem {
   type: '맞춤법' | '띄어쓰기' | '문장부호'
   original: string
   suggestion: string
-  confidence: number // 0~1
-  confirmed: boolean // true=확정 오류, false=낮은확신도 후보
+  confidence: number
+  confirmed: boolean
 }
 
 export interface Post {
@@ -19,7 +19,7 @@ export interface Post {
   childId: string
   title: string
   content: string
-  createdAt: string // ISO date
+  createdAt: string
   mode: 'pen' | 'keyboard'
   errorCount: number
   lowConfidenceCount: number
@@ -90,3 +90,53 @@ export function postsByChild(childId: string): Post[] {
 export function errorsByPost(postId: string): ErrorItem[] {
   return errors.filter((e) => e.postId === postId)
 }
+
+export interface ParentChildSummary {
+  childId: string
+  name: string
+  ageLabel: string
+  postsThisWeek: number
+  selfCorrections: number
+  streakDays: number
+  recentTitle: string
+  repeatedErrorTypes: string[]
+  errorsThisWeek: number
+  errorDeltaVsLastWeek: number // 음수 = 감소
+  selfCorrectionRate: number // 0~100
+  focusArea: string
+  focusGuidance: string
+}
+
+export const parentHomeSummaries: ParentChildSummary[] = [
+  {
+    childId: 'child-1',
+    name: '김민준',
+    ageLabel: '8세',
+    postsThisWeek: 3,
+    selfCorrections: 2,
+    streakDays: 5,
+    recentTitle: '오늘 강아지랑 산책했어요',
+    repeatedErrorTypes: ['띄어쓰기', '받침'],
+    errorsThisWeek: 4,
+    errorDeltaVsLastWeek: -2,
+    selfCorrectionRate: 67,
+    focusArea: '낱말 사이 띄어쓰기',
+    focusGuidance: '받침 오류가 꾸준히 줄고 있어요. 이번 주에는 띄어쓰기 습관을 함께 살펴보세요.',
+  },
+  {
+    childId: 'child-2',
+    name: '김서연',
+    ageLabel: '10세',
+    postsThisWeek: 1,
+    selfCorrections: 0,
+    streakDays: 1,
+    recentTitle: '그림 그리는 게 재미있다',
+    repeatedErrorTypes: ['조사·어미', '띄어쓰기'],
+    errorsThisWeek: 7,
+    errorDeltaVsLastWeek: 0,
+    selfCorrectionRate: 0,
+    focusArea: '조사·어미 바르게 쓰기',
+    focusGuidance:
+      '조사와 어미 사용에서 같은 오류가 반복되고 있어요. 짧은 문장 쓰기를 격려해 보세요.',
+  },
+]
