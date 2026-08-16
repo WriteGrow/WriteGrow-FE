@@ -1,4 +1,5 @@
-import type { ParentChildSummary } from '../../mocks/seed'
+import { Link } from 'react-router-dom'
+import type { ParentChildSummary } from '../../../mocks/seed'
 
 export function ActivityCard({ child }: { child: ParentChildSummary }) {
   return (
@@ -31,12 +32,12 @@ export function ActivityCard({ child }: { child: ParentChildSummary }) {
         </button>
       </div>
 
-      <button
-        type="button"
-        className="mt-auto w-full rounded-[5px] bg-black px-4 py-2.5 text-[12px] font-semibold text-white hover:bg-black/90"
+      <Link
+        to={`/parent/children/${child.childId}/report`}
+        className="mt-auto block w-full rounded-[5px] bg-black px-4 py-2.5 text-center text-[12px] font-semibold text-white hover:bg-black/90"
       >
         주간 성장 리포트 보기
-      </button>
+      </Link>
     </article>
   )
 }

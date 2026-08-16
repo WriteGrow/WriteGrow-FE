@@ -21,8 +21,8 @@ export function ParentLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-svh bg-[#f3f4f6]">
-      <aside className="flex w-44 shrink-0 flex-col border-r border-ink/10 bg-white px-3 py-5">
+    <div className="flex h-svh overflow-hidden bg-[#f3f4f6]">
+      <aside className="flex h-full w-44 shrink-0 flex-col border-r border-ink/10 bg-white px-3 py-5">
         <p className="mb-6 px-2 text-lg font-bold tracking-tight text-black">글쑥쑥</p>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
@@ -69,8 +69,8 @@ export function ParentLayout({ children }: { children: ReactNode }) {
         </nav>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-14 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
           <label className="relative w-full max-w-xs">
             <span className="sr-only">검색</span>
             <FiSearch
@@ -98,7 +98,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
           </button>
         </header>
 
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
 
       <RoleSwitcher />

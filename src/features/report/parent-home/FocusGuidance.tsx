@@ -1,4 +1,4 @@
-import type { ParentChildSummary } from '../../mocks/seed'
+import type { ParentChildSummary } from '../../../mocks/seed'
 
 export function FocusGuidance({ child }: { child: ParentChildSummary }) {
   return (
