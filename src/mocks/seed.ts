@@ -195,11 +195,11 @@ export const parentWeeklyReports: Record<string, ParentWeeklyReport> = {
     correctionDone: 3,
     cumulativeSelfCorrections: 12,
     trends: [
-      { date: '8/10', sentenceCount: 6, errorCandidates: 3, selfCorrections: 1 },
-      { date: '8/11', sentenceCount: 8, errorCandidates: 4, selfCorrections: 2 },
-      { date: '8/12', sentenceCount: 5, errorCandidates: 2, selfCorrections: 1 },
-      { date: '8/13', sentenceCount: 7, errorCandidates: 3, selfCorrections: 2 },
-      { date: '8/14', sentenceCount: 9, errorCandidates: 2, selfCorrections: 2 },
+      { date: '2026.08.10', sentenceCount: 6, errorCandidates: 3, selfCorrections: 1 },
+      { date: '2026.08.11', sentenceCount: 8, errorCandidates: 4, selfCorrections: 2 },
+      { date: '2026.08.12', sentenceCount: 5, errorCandidates: 2, selfCorrections: 1 },
+      { date: '2026.08.13', sentenceCount: 7, errorCandidates: 3, selfCorrections: 2 },
+      { date: '2026.08.14', sentenceCount: 9, errorCandidates: 2, selfCorrections: 2 },
     ],
     focusAreaTitle: '받침 표기',
     focusAreaDescription:
