@@ -3,6 +3,7 @@ import {
   children,
   errorsByPost,
   parentHomeSummaries,
+  parentPostById,
   postsByChild,
   weeklyReportByChild,
 } from './seed'
@@ -25,6 +26,14 @@ export const handlers = [
     const report = weeklyReportByChild(String(params.childId))
     if (!report) return new HttpResponse(null, { status: 404 })
     return HttpResponse.json(report)
+  }),
+
+  http.get('/api/children/:childId/posts/:postId', ({ params }) => {
+    const detail = parentPostById(String(params.postId))
+    if (!detail || detail.childId !== String(params.childId)) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json(detail)
   }),
 
   http.get('/api/posts/:postId/errors', ({ params }) => {

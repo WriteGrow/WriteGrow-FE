@@ -36,7 +36,7 @@ export function ParentReport() {
       <WeeklyTrendTable trends={data.trends} />
       <ReportFocusSection report={data} />
       <LowConfidenceReview pendingCount={data.lowConfidencePending} />
-      <PostRevisionTable posts={data.posts} />
+      <PostRevisionTable childId={data.childId} posts={data.posts} />
     </div>
   )
 }

@@ -280,3 +280,133 @@ export const parentWeeklyReports: Record<string, ParentWeeklyReport> = {
 export function weeklyReportByChild(childId: string): ParentWeeklyReport | undefined {
   return parentWeeklyReports[childId]
 }
+
+export interface PostChange {
+  original: string
+  corrected: string
+}
+
+export interface ParentPostDetail {
+  postId: string
+  childId: string
+  authorName: string
+  ageLabel: string
+  writtenAtLabel: string
+  title: string
+  submissionCount: number
+  originalContent: string
+  revisedContent: string
+  changedCount: number
+  selfCorrectionDone: number
+  selfCorrectionTotal: number
+  correctionTypes: string[]
+  changes: PostChange[]
+  summaryNote: string
+}
+
+export const parentPostDetails: Record<string, ParentPostDetail> = {
+  'post-child-1-7': {
+    postId: 'post-child-1-7',
+    childId: 'child-1',
+    authorName: '김민준',
+    ageLabel: '8세',
+    writtenAtLabel: '2026년 8월 14일 (금)',
+    title: '오늘 공원에서 있었던 일',
+    submissionCount: 3,
+    originalContent:
+      '오늘 공원에서가서 친구랑 축구를 했어요. 공이 너무 높이 올라가서 잡지 못했어요. 그래도 재미 있었어요.',
+    revisedContent:
+      '오늘 공원에 가서 친구랑 축구를 했어요. 공이 너무 높이 올라가서 잡지 못했어요. 그래도 재미있었어요.',
+    changedCount: 2,
+    selfCorrectionDone: 2,
+    selfCorrectionTotal: 2,
+    correctionTypes: ['띄어쓰기'],
+    changes: [
+      { original: '공원에서가서', corrected: '공원에 가서' },
+      { original: '재미 있었어요', corrected: '재미있었어요' },
+    ],
+    summaryNote:
+      '이 글에서 민준이는 힌트를 보고 스스로 두 곳을 고쳤습니다. 원문의 자유로운 표현은 그대로 유지되었습니다.',
+  },
+  'post-child-1-6': {
+    postId: 'post-child-1-6',
+    childId: 'child-1',
+    authorName: '김민준',
+    ageLabel: '8세',
+    writtenAtLabel: '2026년 8월 13일 (목)',
+    title: '가장 기억에 남는 여행',
+    submissionCount: 2,
+    originalContent:
+      '지난 주말에 바다에갔어요. 파도가 커서 신기했어요. 모래성도 만들고 조개도 주웠어요.',
+    revisedContent:
+      '지난 주말에 바다에 갔어요. 파도가 커서 신기했어요. 모래성도 만들고 조개도 주웠어요.',
+    changedCount: 1,
+    selfCorrectionDone: 1,
+    selfCorrectionTotal: 1,
+    correctionTypes: ['띄어쓰기'],
+    changes: [{ original: '바다에갔어요', corrected: '바다에 갔어요' }],
+    summaryNote:
+      '이 글에서 민준이는 힌트를 보고 스스로 한 곳을 고쳤습니다. 원문의 자유로운 표현은 그대로 유지되었습니다.',
+  },
+  'post-child-1-5': {
+    postId: 'post-child-1-5',
+    childId: 'child-1',
+    authorName: '김민준',
+    ageLabel: '8세',
+    writtenAtLabel: '2026년 8월 12일 (수)',
+    title: '내가 좋아하는 동물',
+    submissionCount: 1,
+    originalContent: '나는 강아지를 좋아해요. 꼬리를 흔들때 귀여워요.',
+    revisedContent: '나는 강아지를 좋아해요. 꼬리를 흔들 때 귀여워요.',
+    changedCount: 1,
+    selfCorrectionDone: 0,
+    selfCorrectionTotal: 1,
+    correctionTypes: ['띄어쓰기'],
+    changes: [{ original: '흔들때', corrected: '흔들 때' }],
+    summaryNote:
+      '이 글에는 아직 자기교정이 끝나지 않은 항목이 있어요. 함께 다시 읽어보면 좋겠습니다.',
+  },
+  'post-child-1-4': {
+    postId: 'post-child-1-4',
+    childId: 'child-1',
+    authorName: '김민준',
+    ageLabel: '8세',
+    writtenAtLabel: '2026년 8월 11일 (화)',
+    title: '주말에 가족과 한 일',
+    submissionCount: 4,
+    originalContent: '주말에 할머니집에갔어요. 맛있는 과일도 먹고 이야기도 많이 했어요.',
+    revisedContent: '주말에 할머니 집에 갔어요. 맛있는 과일도 먹고 이야기도 많이 했어요.',
+    changedCount: 1,
+    selfCorrectionDone: 1,
+    selfCorrectionTotal: 1,
+    correctionTypes: ['띄어쓰기'],
+    changes: [{ original: '할머니집에갔어요', corrected: '할머니 집에 갔어요' }],
+    summaryNote:
+      '이 글에서 민준이는 힌트를 보고 스스로 한 곳을 고쳤습니다. 원문의 자유로운 표현은 그대로 유지되었습니다.',
+  },
+  'post-child-2-6': {
+    postId: 'post-child-2-6',
+    childId: 'child-2',
+    authorName: '김서연',
+    ageLabel: '10세',
+    writtenAtLabel: '2026년 8월 14일 (금)',
+    title: '그림 그리는 게 재미있다',
+    submissionCount: 1,
+    originalContent: '나는 그림그리는게 재미있다. 색깔을 섞으면 새로운색이 나와서 신기하다.',
+    revisedContent: '나는 그림 그리는 게 재미있다. 색깔을 섞으면 새로운 색이 나와서 신기하다.',
+    changedCount: 2,
+    selfCorrectionDone: 0,
+    selfCorrectionTotal: 2,
+    correctionTypes: ['띄어쓰기'],
+    changes: [
+      { original: '그림그리는게', corrected: '그림 그리는 게' },
+      { original: '새로운색이', corrected: '새로운 색이' },
+    ],
+    summaryNote:
+      '이 글에는 아직 자기교정이 끝나지 않은 항목이 있어요. 함께 다시 읽어보면 좋겠습니다.',
+  },
+}
+
+export function parentPostById(postId: string): ParentPostDetail | undefined {
+  return parentPostDetails[postId]
+}

@@ -1,6 +1,13 @@
+import { Link } from 'react-router-dom'
 import type { WeeklyPostRow } from '../../../mocks/seed'
 
-export function PostRevisionTable({ posts }: { posts: WeeklyPostRow[] }) {
+export function PostRevisionTable({
+  childId,
+  posts,
+}: {
+  childId: string
+  posts: WeeklyPostRow[]
+}) {
   return (
     <section className="space-y-4">
       <h2 className="text-[16px] font-semibold text-black">개별 글 수정 전후 열람</h2>
@@ -20,7 +27,14 @@ export function PostRevisionTable({ posts }: { posts: WeeklyPostRow[] }) {
               {posts.map((post) => (
                 <tr key={post.postId} className="border-b border-black/10 last:border-b-0">
                   <td className="px-4 py-2">{post.writtenAt}</td>
-                  <td className="px-4 py-2">{post.title}</td>
+                  <td className="px-4 py-2">
+                    <Link
+                      to={`/parent/children/${childId}/posts/${post.postId}`}
+                      className="hover:underline"
+                    >
+                      {post.title}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2">{post.errorCount}</td>
                   <td className="px-4 py-2">{post.selfCorrections}</td>
                   <td className="px-4 py-2">{post.status}</td>
@@ -30,12 +44,16 @@ export function PostRevisionTable({ posts }: { posts: WeeklyPostRow[] }) {
           </table>
         </div>
         <div className="mt-3 flex justify-end">
-          <button
-            type="button"
-            className="text-[12px] text-black/50 hover:text-black cursor-pointer"
-          >
-            수정 전후 열람
-          </button>
+          {posts[0] ? (
+            <Link
+              to={`/parent/children/${childId}/posts/${posts[0].postId}`}
+              className="cursor-pointer text-[12px] text-black/50 hover:text-black"
+            >
+              수정 전후 열람
+            </Link>
+          ) : (
+            <span className="text-[12px] text-black/35">수정 전후 열람</span>
+          )}
         </div>
       </div>
     </section>
