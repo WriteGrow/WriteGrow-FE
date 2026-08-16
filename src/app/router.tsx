@@ -4,6 +4,7 @@ import { ChildLayout } from '../components/ui/ChildLayout'
 import { ParentLayout } from '../components/ui/ParentLayout'
 import { ChildHome } from '../features/writing/ChildHome'
 import { ParentHome } from '../features/report/ParentHome'
+import { ParentPost } from '../features/report/ParentPost'
 import { ParentReport } from '../features/report/ParentReport'
 
 export const router = createBrowserRouter([
@@ -34,6 +35,16 @@ export const router = createBrowserRouter([
       <RoleGuard allow="parent">
         <ParentLayout>
           <ParentReport />
+        </ParentLayout>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/posts/:postId',
+    element: (
+      <RoleGuard allow="parent">
+        <ParentLayout>
+          <ParentPost />
         </ParentLayout>
       </RoleGuard>
     ),
