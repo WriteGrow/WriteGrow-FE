@@ -22,20 +22,20 @@ export function OcrConfirm() {
   return (
     <div className="space-y-4">
       <h1 className="text-[16px] font-semibold text-black">이렇게 읽었어, 맞아?</h1>
-      <p className="text-body text-ink/70">잘못 읽은 부분이 있으면 고쳐줘.</p>
+      <p className="text-[14px] text-black/70">잘못 읽은 부분이 있으면 고쳐줘.</p>
 
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={6}
-        className="w-full rounded-xl border border-ink/10 p-4 text-body"
+        className="w-full rounded-[5px] border border-black/15 p-4 text-[14px] outline-none focus:border-black"
       />
 
       <button
         type="button"
         onClick={confirm}
         disabled={!text.trim()}
-        className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
+        className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
       >
         맞아, 다음으로
       </button>

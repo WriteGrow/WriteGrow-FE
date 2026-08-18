@@ -22,9 +22,9 @@ export function Result() {
     <div className="space-y-6">
       <h1 className="text-[16px] font-semibold text-black">잘했어! 오늘도 한 편 완성했네</h1>
 
-      <section className="rounded-xl border border-black/10 bg-white p-4">
+      <section className="rounded-[10px] border border-black/10 bg-white p-5">
         <h2 className="mb-2 text-[16px] font-semibold text-black">{topic}</h2>
-        <p className="text-body text-ink/80">{content}</p>
+        <p className="text-[14px] text-black/80">{content}</p>
       </section>
 
       {errors.length > 0 ? (
@@ -32,28 +32,28 @@ export function Result() {
           <h2 className="text-[16px] font-semibold text-black">이번에 고친 것들</h2>
           <ul className="space-y-2">
             {errors.map((error) => (
-              <li key={error.id} className="rounded-lg border border-black/10 bg-white p-3 text-body">
+              <li key={error.id} className="rounded-[10px] border border-black/10 bg-white p-3 text-[14px]">
                 {error.original} → {error.suggestion}
               </li>
             ))}
           </ul>
         </section>
       ) : (
-        <p className="text-body text-ink/70">틀린 곳이 하나도 없었어. 정말 잘 썼어!</p>
+        <p className="text-[14px] text-black/70">틀린 곳이 하나도 없었어. 정말 잘 썼어!</p>
       )}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={goPosts}
-          className="min-h-touch flex-1 rounded-xl border border-black/20 px-6 text-body font-semibold text-black"
+          className="flex-1 rounded-[5px] border border-black/20 px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-black/5"
         >
           이전 글 보기
         </button>
         <button
           type="button"
           onClick={goHome}
-          className="min-h-touch flex-1 rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
+          className="flex-1 rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
         >
           홈으로
         </button>

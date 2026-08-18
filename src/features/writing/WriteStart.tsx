@@ -42,7 +42,7 @@ export function WriteStart() {
             key={topic}
             type="button"
             onClick={() => setSelectedTopic(topic)}
-            className={`min-h-touch rounded-xl px-4 text-body ${
+            className={`rounded-[5px] px-4 py-2.5 text-[12px] ${
               selectedTopic === topic ? 'bg-black text-white' : 'border border-black/15 bg-white text-black/70'
             }`}
           >
@@ -56,14 +56,14 @@ export function WriteStart() {
           <button
             type="button"
             onClick={choosePen}
-            className="min-h-touch flex-1 rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
+            className="flex-1 rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
           >
             펜으로 쓰기
           </button>
           <button
             type="button"
             onClick={chooseKeyboard}
-            className="min-h-touch flex-1 rounded-xl border border-black/20 px-6 text-body font-semibold text-black"
+            className="flex-1 rounded-[5px] border border-black/20 px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-black/5"
           >
             키보드로 쓰기
           </button>
@@ -77,13 +77,13 @@ export function WriteStart() {
             onChange={(e) => setDraft(e.target.value)}
             placeholder="오늘 있었던 일을 자유롭게 써볼까?"
             rows={6}
-            className="w-full rounded-xl border border-ink/10 p-4 text-body"
+            className="w-full rounded-[5px] border border-black/15 p-4 text-[14px] outline-none placeholder:text-black/40 focus:border-black"
           />
           <button
             type="button"
             onClick={submitKeyboard}
             disabled={!draft.trim()}
-            className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
+            className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
           >
             다 썼어요
           </button>

@@ -38,28 +38,28 @@ export function ChildHome() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
-          <section className="rounded-xl border border-black/10 bg-white p-6">
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
             <h2 className="mb-2 text-[16px] font-semibold text-black">오늘의 글쓰기</h2>
-            <p className="mb-4 text-body text-ink/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
+            <p className="mb-4 text-[14px] text-black/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
             <button
               type="button"
               onClick={startWriting}
-              className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
+              className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
             >
               새 글쓰기 시작하기
             </button>
           </section>
 
-          <section className="rounded-xl border border-black/10 bg-white p-6">
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
             <h2 className="mb-1 text-[16px] font-semibold text-black">오늘의 추천 주제</h2>
-            <p className="mb-3 text-sm text-ink/60">자유 선택</p>
+            <p className="mb-3 text-[12px] text-black/50">자유 선택</p>
             <div className="flex flex-wrap gap-2">
               {TOPICS.map((topic) => (
                 <button
                   key={topic}
                   type="button"
                   onClick={startWriting}
-                  className="min-h-touch rounded-xl border border-black/15 px-4 text-body text-black/70 hover:bg-black/5"
+                  className="rounded-[5px] border border-black/15 px-4 py-2.5 text-[12px] text-black/70 hover:bg-black/5"
                 >
                   {topic}
                 </button>
@@ -70,16 +70,16 @@ export function ChildHome() {
 
         <div className="space-y-4">
           {latestCorrection && (
-            <section className="rounded-xl border border-black/10 bg-white p-6">
+            <section className="rounded-[10px] border border-black/10 bg-white p-5">
               <h2 className="mb-2 text-[16px] font-semibold text-black">최근 자기교정 성공 🎉</h2>
-              <p className="text-sm text-ink/70">
+              <p className="text-[12px] text-black/70">
                 지난번에 &apos;{latestCorrection.original}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
                 &apos;(으)로 고쳤어요. 정말 잘했어요!
               </p>
             </section>
           )}
 
-          <section className="rounded-xl border border-black/10 bg-white p-6">
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-[16px] font-semibold text-black">이전 글 기록</h2>
               <button
@@ -90,21 +90,21 @@ export function ChildHome() {
                 전체 보기
               </button>
             </div>
-            <p className="mb-3 text-sm text-ink/60">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
-            {isLoading && <p>불러오는 중...</p>}
+            <p className="mb-3 text-[12px] text-black/50">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
+            {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
             <ul className="space-y-2">
               {posts?.slice(0, 5).map((post) => (
                 <li key={post.id}>
                   <button
                     type="button"
                     onClick={() => navigate(`/child/posts/${post.id}`)}
-                    className="min-h-touch w-full rounded-lg border border-ink/10 p-3 text-left"
+                    className="w-full rounded-[10px] border border-black/10 p-3 text-left"
                   >
-                    <p className="text-xs text-ink/60">
+                    <p className="text-[12px] text-black/50">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')} ·{' '}
                       {post.errorCount > 0 ? '자기교정 성공' : '수정 완료'}
                     </p>
-                    <p className="text-body font-semibold">{post.title}</p>
+                    <p className="text-[14px] font-semibold text-black">{post.title}</p>
                   </button>
                 </li>
               ))}

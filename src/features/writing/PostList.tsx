@@ -16,17 +16,17 @@ export function PostList() {
   return (
     <div className="space-y-4">
       <h1 className="text-[16px] font-semibold text-black">이전 글</h1>
-      {isLoading && <p className="text-body">불러오는 중...</p>}
+      {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
       <ul className="space-y-2">
         {posts?.map((post) => (
           <li key={post.id}>
             <button
               type="button"
               onClick={() => navigate(`/child/posts/${post.id}`)}
-              className="min-h-touch w-full rounded-lg bg-white p-4 text-left shadow-sm"
+              className="w-full rounded-[10px] border border-black/10 bg-white p-4 text-left"
             >
-              <p className="text-body font-semibold">{post.title}</p>
-              <p className="text-sm text-ink/60">
+              <p className="text-[14px] font-semibold text-black">{post.title}</p>
+              <p className="text-[12px] text-black/50">
                 {new Date(post.createdAt).toLocaleDateString('ko-KR')} · 고친 것 {post.errorCount}개
               </p>
             </button>

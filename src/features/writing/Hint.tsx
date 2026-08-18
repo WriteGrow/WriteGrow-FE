@@ -48,46 +48,46 @@ export function Hint() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-ink/60">
+      <p className="text-[12px] text-black/50">
         {hintIndex + 1} / {errors.length}
       </p>
       <h1 className="text-[16px] font-semibold text-black">여기, 다시 한 번 볼까?</h1>
 
-      <p className="rounded-xl bg-white p-4 text-body">
+      <p className="rounded-[10px] border border-black/10 bg-white p-4 text-[14px] text-black">
         {current.type} 부분을 확인해봐 — <mark className="bg-black/10">{current.original}</mark>
       </p>
 
       {hintLevel >= 1 && !revealed && (
-        <p className="text-body text-ink/70">힌트: '{current.suggestion[0]}'으로 시작해</p>
+        <p className="text-[14px] text-black/70">힌트: '{current.suggestion[0]}'으로 시작해</p>
       )}
-      {revealed && <p className="text-body font-semibold text-black">정답: {current.suggestion}</p>}
+      {revealed && <p className="text-[14px] font-semibold text-black">정답: {current.suggestion}</p>}
 
       {!revealed && feedback !== 'correct' && (
         <div className="flex gap-3">
           <input
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            className="min-h-touch flex-1 rounded-xl border border-ink/10 px-4 text-body"
+            className="flex-1 rounded-[5px] border border-black/15 px-4 py-2.5 text-[14px] outline-none focus:border-black"
             placeholder="이렇게 고칠래"
           />
           <button
             type="button"
             onClick={checkAnswer}
             disabled={!answer.trim()}
-            className="min-h-touch rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
+            className="rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
           >
             확인
           </button>
         </div>
       )}
 
-      {feedback === 'wrong' && !revealed && <p className="text-body text-ink/70">다시 한 번 해볼까?</p>}
+      {feedback === 'wrong' && !revealed && <p className="text-[14px] text-black/70">다시 한 번 해볼까?</p>}
 
       {(feedback === 'correct' || revealed) && (
         <button
           type="button"
           onClick={goNext}
-          className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
+          className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
         >
           다음
         </button>
