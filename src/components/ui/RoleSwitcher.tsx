@@ -13,18 +13,19 @@ export function RoleSwitcher() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 flex gap-2 rounded-full bg-ink/90 p-1 text-sm text-white shadow-lg">
+    <div className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-ink/90 p-1 text-sm text-white">
+      <span className="hidden pl-2 pr-1 text-xs text-white/60 sm:inline">역할 선택</span>
       <button
         type="button"
         onClick={() => switchTo('child')}
-        className={`rounded-full px-4 py-2 ${role === 'child' ? 'bg-brand' : ''}`}
+        className={`rounded-full px-3 py-1 ${role === 'child' ? 'bg-brand' : ''}`}
       >
         아동
       </button>
       <button
         type="button"
         onClick={() => switchTo('parent')}
-        className={`rounded-full px-4 py-2 ${role === 'parent' ? 'bg-brand' : ''}`}
+        className={`rounded-full px-3 py-1 ${role === 'parent' ? 'bg-brand' : ''}`}
       >
         보호자
       </button>
