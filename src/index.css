@@ -11,8 +11,6 @@
   /* --color-ink / --color-surface 조합은 대비 4.5:1 이상을 만족한다. */
   --color-ink: #1a1a1a;
   --color-surface: #ffffff;
-  --color-brand: #2b7f6a;
-  --color-brand-soft: #e3f2ee;
 }
 
 body {

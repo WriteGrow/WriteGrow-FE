@@ -18,7 +18,7 @@ export function RoleSwitcher() {
         type="button"
         onClick={() => switchTo('child')}
         className={`shrink-0 rounded-[5px] border px-3 py-2 text-[14px] ${
-          role === 'child' ? 'border-brand bg-brand text-white' : 'border-black/15 text-black/50 hover:bg-black/5'
+          role === 'child' ? 'border-black bg-black text-white' : 'border-black/15 text-black/50 hover:bg-black/5'
         }`}
       >
         아동
@@ -27,7 +27,7 @@ export function RoleSwitcher() {
         type="button"
         onClick={() => switchTo('parent')}
         className={`shrink-0 rounded-[5px] border px-3 py-2 text-[14px] ${
-          role === 'parent' ? 'border-brand bg-brand text-white' : 'border-black/15 text-black/50 hover:bg-black/5'
+          role === 'parent' ? 'border-black bg-black text-white' : 'border-black/15 text-black/50 hover:bg-black/5'
         }`}
       >
         보호자

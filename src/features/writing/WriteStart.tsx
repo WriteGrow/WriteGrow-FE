@@ -43,7 +43,7 @@ export function WriteStart() {
             type="button"
             onClick={() => setSelectedTopic(topic)}
             className={`min-h-touch rounded-xl px-4 text-body ${
-              selectedTopic === topic ? 'bg-brand text-white' : 'border border-black/15 bg-white text-black/70'
+              selectedTopic === topic ? 'bg-black text-white' : 'border border-black/15 bg-white text-black/70'
             }`}
           >
             {topic}

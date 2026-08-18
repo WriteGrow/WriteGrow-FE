@@ -54,7 +54,7 @@ export function Analyzing() {
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-      <div className="size-12 animate-spin rounded-full border-4 border-brand-soft border-t-brand" />
+      <div className="size-12 animate-spin rounded-full border-4 border-black/10 border-t-black" />
       <p className="text-body">틀린 곳이 있는지 살펴보고 있어...</p>
     </div>
   )

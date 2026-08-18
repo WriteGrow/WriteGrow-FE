@@ -82,7 +82,7 @@ export function PenWrite() {
                 type="button"
                 onClick={() => setTool('pen')}
                 className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
-                  tool === 'pen' ? 'bg-brand text-white' : 'text-ink/70'
+                  tool === 'pen' ? 'bg-black text-white' : 'text-ink/70'
                 }`}
               >
                 펜
@@ -91,7 +91,7 @@ export function PenWrite() {
                 type="button"
                 onClick={() => setTool('eraser')}
                 className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
-                  tool === 'eraser' ? 'bg-brand text-white' : 'text-ink/70'
+                  tool === 'eraser' ? 'bg-black text-white' : 'text-ink/70'
                 }`}
               >
                 지우개
@@ -128,7 +128,7 @@ export function PenWrite() {
               aria-checked={stylusOnly}
               onClick={() => setStylusOnly((v) => !v)}
               className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-                stylusOnly ? 'bg-brand' : 'bg-ink/20'
+                stylusOnly ? 'bg-black' : 'bg-ink/20'
               }`}
             >
               <span

@@ -54,13 +54,13 @@ export function Hint() {
       <h1 className="text-[16px] font-semibold text-black">여기, 다시 한 번 볼까?</h1>
 
       <p className="rounded-xl bg-white p-4 text-body">
-        {current.type} 부분을 확인해봐 — <mark className="bg-brand-soft">{current.original}</mark>
+        {current.type} 부분을 확인해봐 — <mark className="bg-black/10">{current.original}</mark>
       </p>
 
       {hintLevel >= 1 && !revealed && (
         <p className="text-body text-ink/70">힌트: '{current.suggestion[0]}'으로 시작해</p>
       )}
-      {revealed && <p className="text-body font-semibold text-brand">정답: {current.suggestion}</p>}
+      {revealed && <p className="text-body font-semibold text-black">정답: {current.suggestion}</p>}
 
       {!revealed && feedback !== 'correct' && (
         <div className="flex gap-3">

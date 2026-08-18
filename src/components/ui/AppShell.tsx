@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     [
                       'rounded-md px-3 py-2.5 text-sm',
                       isActive
-                        ? 'bg-brand font-semibold text-white'
+                        ? 'bg-black font-semibold text-white'
                         : 'text-black/80 hover:bg-black/5',
                     ].join(' ')
                   }
@@ -80,7 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <input
               type="search"
               placeholder="검색"
-              className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-brand"
+              className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-black"
             />
           </label>
           <RoleSwitcher />
