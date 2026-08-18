@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useRoleStore } from '../../stores/roleStore'
-import { RoleSwitcher } from './RoleSwitcher'
 
 const navItems = [
   { label: '아동 홈', to: '/child', role: 'child' as const },
@@ -100,8 +99,6 @@ export function ParentLayout({ children }: { children: ReactNode }) {
 
         <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
-
-      <RoleSwitcher />
     </div>
   )
 }
