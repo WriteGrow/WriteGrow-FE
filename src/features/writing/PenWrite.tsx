@@ -70,7 +70,7 @@ export function PenWrite() {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold">{topic}</h1>
+        <h1 className="text-[16px] font-semibold text-black">{topic}</h1>
         <p className="text-body text-ink/70">펜으로 편하게 써볼까?</p>
       </div>
 
@@ -163,7 +163,7 @@ export function PenWrite() {
               type="button"
               onClick={() => ocrMutation.mutate(strokes.length)}
               disabled={strokes.length === 0 || ocrMutation.isPending}
-              className="min-h-touch flex-1 rounded-xl bg-brand px-6 text-body font-semibold text-white disabled:opacity-40"
+              className="min-h-touch flex-1 rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
             >
               {ocrMutation.isPending ? '읽는 중...' : '완료'}
             </button>

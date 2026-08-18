@@ -15,7 +15,7 @@ export function PostList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">이전 글</h1>
+      <h1 className="text-[16px] font-semibold text-black">이전 글</h1>
       {isLoading && <p className="text-body">불러오는 중...</p>}
       <ul className="space-y-2">
         {posts?.map((post) => (

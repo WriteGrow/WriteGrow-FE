@@ -21,7 +21,7 @@ export function OcrConfirm() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">이렇게 읽었어, 맞아?</h1>
+      <h1 className="text-[16px] font-semibold text-black">이렇게 읽었어, 맞아?</h1>
       <p className="text-body text-ink/70">잘못 읽은 부분이 있으면 고쳐줘.</p>
 
       <textarea
@@ -35,7 +35,7 @@ export function OcrConfirm() {
         type="button"
         onClick={confirm}
         disabled={!text.trim()}
-        className="min-h-touch w-full rounded-xl bg-brand px-6 text-body font-semibold text-white disabled:opacity-40"
+        className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
       >
         맞아, 다음으로
       </button>

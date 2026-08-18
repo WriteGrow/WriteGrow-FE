@@ -34,24 +34,24 @@ export function ChildHome() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">안녕, 오늘도 글을 써볼까?</h1>
+      <h1 className="text-[16px] font-semibold text-black">안녕, 오늘도 글을 써볼까?</h1>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
-            <h2 className="mb-2 font-semibold">오늘의 글쓰기</h2>
+          <section className="rounded-xl border border-black/10 bg-white p-6">
+            <h2 className="mb-2 text-[16px] font-semibold text-black">오늘의 글쓰기</h2>
             <p className="mb-4 text-body text-ink/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
             <button
               type="button"
               onClick={startWriting}
-              className="min-h-touch w-full rounded-xl bg-brand px-6 text-body font-semibold text-white"
+              className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
             >
               새 글쓰기 시작하기
             </button>
           </section>
 
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
-            <h2 className="mb-1 font-semibold">오늘의 추천 주제</h2>
+          <section className="rounded-xl border border-black/10 bg-white p-6">
+            <h2 className="mb-1 text-[16px] font-semibold text-black">오늘의 추천 주제</h2>
             <p className="mb-3 text-sm text-ink/60">자유 선택</p>
             <div className="flex flex-wrap gap-2">
               {TOPICS.map((topic) => (
@@ -59,7 +59,7 @@ export function ChildHome() {
                   key={topic}
                   type="button"
                   onClick={startWriting}
-                  className="min-h-touch rounded-xl bg-brand-soft px-4 text-body text-brand"
+                  className="min-h-touch rounded-xl border border-black/15 px-4 text-body text-black/70 hover:bg-black/5"
                 >
                   {topic}
                 </button>
@@ -70,8 +70,8 @@ export function ChildHome() {
 
         <div className="space-y-4">
           {latestCorrection && (
-            <section className="rounded-xl border border-ink/10 bg-white p-6">
-              <h2 className="mb-2 font-semibold">최근 자기교정 성공 🎉</h2>
+            <section className="rounded-xl border border-black/10 bg-white p-6">
+              <h2 className="mb-2 text-[16px] font-semibold text-black">최근 자기교정 성공 🎉</h2>
               <p className="text-sm text-ink/70">
                 지난번에 &apos;{latestCorrection.original}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
                 &apos;(으)로 고쳤어요. 정말 잘했어요!
@@ -79,10 +79,14 @@ export function ChildHome() {
             </section>
           )}
 
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
+          <section className="rounded-xl border border-black/10 bg-white p-6">
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-semibold">이전 글 기록</h2>
-              <button type="button" onClick={() => navigate('/child/posts')} className="text-sm text-brand">
+              <h2 className="text-[16px] font-semibold text-black">이전 글 기록</h2>
+              <button
+                type="button"
+                onClick={() => navigate('/child/posts')}
+                className="text-[14px] text-black/50 hover:text-black"
+              >
                 전체 보기
               </button>
             </div>

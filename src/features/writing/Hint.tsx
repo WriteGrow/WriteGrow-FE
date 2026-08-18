@@ -51,7 +51,7 @@ export function Hint() {
       <p className="text-sm text-ink/60">
         {hintIndex + 1} / {errors.length}
       </p>
-      <h1 className="text-2xl font-bold">여기, 다시 한 번 볼까?</h1>
+      <h1 className="text-[16px] font-semibold text-black">여기, 다시 한 번 볼까?</h1>
 
       <p className="rounded-xl bg-white p-4 text-body">
         {current.type} 부분을 확인해봐 — <mark className="bg-brand-soft">{current.original}</mark>
@@ -74,7 +74,7 @@ export function Hint() {
             type="button"
             onClick={checkAnswer}
             disabled={!answer.trim()}
-            className="min-h-touch rounded-xl bg-brand px-6 text-body font-semibold text-white disabled:opacity-40"
+            className="min-h-touch rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90 disabled:opacity-40"
           >
             확인
           </button>
@@ -87,7 +87,7 @@ export function Hint() {
         <button
           type="button"
           onClick={goNext}
-          className="min-h-touch w-full rounded-xl bg-brand px-6 text-body font-semibold text-white"
+          className="min-h-touch w-full rounded-xl bg-black px-6 text-body font-semibold text-white hover:bg-black/90"
         >
           다음
         </button>
