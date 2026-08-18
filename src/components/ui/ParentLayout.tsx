@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useRoleStore } from '../../stores/roleStore'
+import { RoleSwitcher } from './RoleSwitcher'
 
 const navItems = [
   { label: '아동 홈', to: '/child', role: 'child' as const },
@@ -82,13 +83,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
               className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-brand"
             />
           </label>
-          <button
-            type="button"
-            onClick={goChild}
-            className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50 hover:bg-black/5"
-          >
-            역할 선택
-          </button>
+          <RoleSwitcher />
           <button
             type="button"
             className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50"

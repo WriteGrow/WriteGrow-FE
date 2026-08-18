@@ -1,78 +1,96 @@
 import type { ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useRoleStore, type Role } from '../../stores/roleStore'
+import { FiSearch } from 'react-icons/fi'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useRoleStore } from '../../stores/roleStore'
 import { RoleSwitcher } from './RoleSwitcher'
 
-interface NavItem {
-  label: string
-  to?: string
-  role?: Role
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: '아동 홈', to: '/child', role: 'child' },
-  { label: '보호자 홈', to: '/parent', role: 'parent' },
-  { label: '교사 홈' }, // s5, 라우트 미구현
-  { label: '보호자 설정' }, // s4, 라우트 미구현
+const navItems = [
+  { label: '아동 홈', to: '/child', role: null },
+  { label: '보호자 홈', to: '/parent', role: 'parent' as const },
+  { label: '교사 홈', to: null, role: null },
+  { label: '보호자 설정', to: null, role: null },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const location = useLocation()
-  const navigate = useNavigate()
   const setRole = useRoleStore((s) => s.setRole)
+  const navigate = useNavigate()
+
+  function goParent() {
+    setRole('parent')
+    navigate('/parent')
+  }
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-[#f3f4f6] text-black">
-      <header className="flex min-h-touch shrink-0 items-center justify-between gap-2 border-b border-black/10 bg-white px-4 sm:px-6">
-        <span className="shrink-0 text-lg font-bold tracking-tight text-black">WriteGrow</span>
-        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-          <input
-            type="search"
-            placeholder="검색"
-            className="hidden rounded-[5px] border border-black/15 px-3 py-1.5 text-sm placeholder:text-black/40 sm:block"
-          />
-          <RoleSwitcher />
-          <span className="hidden shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50 sm:inline-block">
-            프로
-          </span>
-        </div>
-      </header>
-
-      <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-48 shrink-0 overflow-y-auto border-r border-black/10 bg-white p-6 sm:block">
-          <p className="mb-3 text-xs font-semibold text-black/40">메뉴</p>
-          <nav className="space-y-1 text-body">
-            {NAV_ITEMS.map((item) => {
-              if (!item.to) {
-                return (
-                  <span
-                    key={item.label}
-                    className="block cursor-not-allowed rounded-md px-3 py-2.5 text-sm text-black/35"
-                    title="곧 제공 예정"
-                  >
-                    {item.label}
-                  </span>
-                )
-              }
-              const isActive = location.pathname.startsWith(item.to)
+    <div className="flex h-svh overflow-hidden bg-[#f3f4f6]">
+      <aside className="flex h-full w-44 shrink-0 flex-col border-r border-black/10 bg-white px-3 py-5">
+        <p className="mb-6 px-2 text-lg font-bold tracking-tight text-black">WriteGrow</p>
+        <nav className="flex flex-col gap-1">
+          {navItems.map((item) => {
+            if (item.role === 'parent') {
               return (
                 <button
                   key={item.label}
                   type="button"
-                  onClick={() => {
-                    if (item.role) setRole(item.role)
-                    navigate(item.to!)
-                  }}
-                  className={`block w-full rounded-md px-3 py-2.5 text-left text-sm ${
-                    isActive ? 'bg-brand font-semibold text-white' : 'text-black/80 hover:bg-black/5'
-                  }`}
+                  onClick={goParent}
+                  className="rounded-md px-3 py-2.5 text-left text-sm text-black/80 hover:bg-black/5"
                 >
                   {item.label}
                 </button>
               )
-            })}
-          </nav>
-        </aside>
+            }
+            if (item.to) {
+              return (
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    [
+                      'rounded-md px-3 py-2.5 text-sm',
+                      isActive
+                        ? 'bg-brand font-semibold text-white'
+                        : 'text-black/80 hover:bg-black/5',
+                    ].join(' ')
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              )
+            }
+            return (
+              <span
+                key={item.label}
+                className="cursor-not-allowed rounded-md px-3 py-2.5 text-sm text-black/35"
+                title="곧 제공 예정"
+              >
+                {item.label}
+              </span>
+            )
+          })}
+        </nav>
+      </aside>
+
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+          <label className="relative w-full max-w-xs">
+            <span className="sr-only">검색</span>
+            <FiSearch
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-black/40"
+            />
+            <input
+              type="search"
+              placeholder="검색"
+              className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-brand"
+            />
+          </label>
+          <RoleSwitcher />
+          <button
+            type="button"
+            className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50"
+          >
+            프로
+          </button>
+        </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
