@@ -6,12 +6,20 @@ import {
   errorsByPost,
   findPostById,
   getOcrSample,
+  parentHomeSummaries,
+  parentPostById,
+  parentReviewByChild,
   postsByChild,
+  weeklyReportByChild,
 } from './seed'
 
 export const handlers = [
   http.get('/api/children', () => {
     return HttpResponse.json(children)
+  }),
+
+  http.get('/api/parent/home', () => {
+    return HttpResponse.json(parentHomeSummaries)
   }),
 
   http.get('/api/children/:childId/posts', ({ params }) => {
@@ -49,17 +57,23 @@ export const handlers = [
   }),
 
   http.get('/api/children/:childId/report/weekly', ({ params }) => {
-    const { childId } = params
-    const childPosts = postsByChild(String(childId))
-    const weekly = childPosts
-      .slice(0, 7)
-      .reverse()
-      .map((post, i) => ({
-        week: `${i + 1}주차`,
-        errorCount: post.errorCount,
-        lowConfidenceCount: post.lowConfidenceCount,
-      }))
-    return HttpResponse.json(weekly)
+    const report = weeklyReportByChild(String(params.childId))
+    if (!report) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(report)
+  }),
+
+  http.get('/api/children/:childId/posts/:postId', ({ params }) => {
+    const detail = parentPostById(String(params.postId))
+    if (!detail || detail.childId !== String(params.childId)) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json(detail)
+  }),
+
+  http.get('/api/children/:childId/review', ({ params }) => {
+    const review = parentReviewByChild(String(params.childId))
+    if (!review) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(review)
   }),
 
   http.get('/api/posts/:postId/errors', ({ params }) => {

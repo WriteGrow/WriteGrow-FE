@@ -12,6 +12,9 @@ import { Result } from '../features/writing/Result'
 import { PostList } from '../features/writing/PostList'
 import { PostDetail } from '../features/writing/PostDetail'
 import { ParentHome } from '../features/report/ParentHome'
+import { ParentPost } from '../features/report/ParentPost'
+import { ParentReport } from '../features/report/ParentReport'
+import { ParentReview } from '../features/report/ParentReview'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/child" replace /> },
@@ -42,6 +45,36 @@ export const router = createBrowserRouter([
       <RoleGuard allow="parent">
         <ParentLayout>
           <ParentHome />
+        </ParentLayout>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/report',
+    element: (
+      <RoleGuard allow="parent">
+        <ParentLayout>
+          <ParentReport />
+        </ParentLayout>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/posts/:postId',
+    element: (
+      <RoleGuard allow="parent">
+        <ParentLayout>
+          <ParentPost />
+        </ParentLayout>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/review',
+    element: (
+      <RoleGuard allow="parent">
+        <ParentLayout>
+          <ParentReview />
         </ParentLayout>
       </RoleGuard>
     ),
