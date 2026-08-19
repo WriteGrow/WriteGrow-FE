@@ -374,4 +374,9 @@ React Query의 `refetchInterval`이 종결 상태에서 `false`를 반환하는 
 `src/lib/api.ts`의 목 변환 어댑터(`mapMockPost`, `mapMockDetail`, `mapMockError`, `mockWritingId`, `mockPostId`)를 삭제한다.
 핸들러가 실 형태로 응답하면 두 모드가 같은 코드 경로를 타므로 어댑터가 필요 없다.
 
-s3(`/api/parent/home` 등)와 PEN 목 핸들러(`/api/ocr`)는 건드리지 않는다. 목 모드에서 계속 동작해야 한다.
+s3(`/api/parent/home` 등) 목 핸들러는 건드리지 않는다. 목 모드에서 계속 동작해야 한다.
+
+`/api/ocr`은 키보드 작업(이슈 #14) 시점에는 보존했다. 그때는 펜 경로를 손대지 않아 목 모드의 펜 흐름이
+이 핸들러에 의존했기 때문이다. **손글씨를 실 API로 옮기는 이 작업에서는 삭제한다.**
+`PenWrite`가 더 이상 호출하지 않으므로 죽은 코드가 되고, 대신 `/strokes`·`/handwriting-image`·`/analysis`·
+`/text`·`/rewrite` 목 핸들러가 그 자리를 채운다.
