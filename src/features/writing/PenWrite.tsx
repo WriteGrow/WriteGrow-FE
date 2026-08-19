@@ -9,7 +9,7 @@ import {
   type Stroke,
 } from '../../lib/pen/PenCanvas'
 import { rasterizeStrokes } from '../../lib/pen/rasterize'
-import { appendStrokes, createWriting, submitWriting, uploadHandwritingImage } from '../../lib/api'
+import { ApiRequestError, appendStrokes, createWriting, submitWriting, uploadHandwritingImage } from '../../lib/api'
 import type { StrokeData } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
@@ -68,7 +68,15 @@ export function PenWrite() {
       await appendStrokes(id, { batchSeq: 0, strokes: strokeData })
       const image = await rasterizeStrokes(strokes, canvasSize)
       await uploadHandwritingImage(id, image, canvasSize)
-      await submitWriting(id)
+      // submit() 은 이미지/획 존재를 검사하지 않는다 — 검사는 나중에 비동기 분석 때 일어난다.
+      // 그래서 재시도 시 실제로는 이미 성공했는데 응답만 놓친 경우가 생길 수 있다. 그때 서버는
+      // ALREADY_SUBMITTED(409) 를 주는데, 이건 실패가 아니라 "이미 목표를 달성했다"는 뜻이다.
+      // 실패로 다루면 아이가 이미 제출된 글 앞에서 다시 시도만 반복하며 화면에 갇힌다.
+      try {
+        await submitWriting(id)
+      } catch (error) {
+        if (!(error instanceof ApiRequestError && error.code === 'ALREADY_SUBMITTED')) throw error
+      }
       return id
     },
     onSuccess: () => navigate('/child/write/ocr'),
