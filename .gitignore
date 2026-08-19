@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# git worktree (Claude Code가 .claude/worktrees 아래에 만든다)
+.claude/worktrees/
