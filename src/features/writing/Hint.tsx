@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWritingStore } from '../../stores/writingStore'
 
+// 오류를 한 번에 하나씩만 보여줘서 R-GLTURC(화면당 교정 대상 최대 2개)를 만족한다.
 export function Hint() {
   const navigate = useNavigate()
   const errors = useWritingStore((s) => s.errors)
@@ -38,6 +39,7 @@ export function Hint() {
       navigate('/child/write/result')
       return
     }
+    // 다음 오류로 넘어갈 때 입력과 판정을 여기서 함께 되돌린다.
     setAnswer('')
     setFeedback('idle')
     nextError()
@@ -48,7 +50,7 @@ export function Hint() {
       <p className="text-[12px] text-black/50">
         {hintIndex + 1} / {errors.length}
       </p>
-      <h1 className="text-[16px] font-semibold text-black">어디가 틀렸는지 다시 찾아볼까?</h1>
+      <h1 className="text-[16px] font-semibold text-black">여기, 다시 한 번 볼까?</h1>
 
       <p className="rounded-[10px] border border-black/10 bg-white p-4 text-[14px] text-black">
         {current.errorTypeLabel} 부분을 확인해봐 — <mark className="bg-black/10">{current.originalText}</mark>
@@ -67,7 +69,7 @@ export function Hint() {
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             className="flex-1 rounded-[5px] border border-black/15 px-4 py-2.5 text-[14px] outline-none focus:border-black"
-            placeholder="어떻게 고치면 좋을까?"
+            placeholder="이렇게 고칠래"
           />
           <button
             type="button"
@@ -80,7 +82,7 @@ export function Hint() {
         </div>
       )}
 
-      {feedback === 'wrong' && !revealed && <p className="text-[14px] text-black/70">다시 한 번 생각해볼까?</p>}
+      {feedback === 'wrong' && !revealed && <p className="text-[14px] text-black/70">다시 한 번 해볼까?</p>}
 
       {(feedback === 'correct' || revealed) && (
         <button
