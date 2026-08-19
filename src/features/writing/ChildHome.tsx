@@ -29,7 +29,10 @@ export function ChildHome() {
     queryFn: () => getWritingErrors(latestPostId as number),
     enabled: latestPostId !== undefined,
   })
-  const latestCorrection = latestErrors?.errors[0]
+  // errors 는 교정 대상으로 확정된 오류, 즉 "아직 틀린 것"이다. 아이가 스스로 고쳤는지는
+  // 현재 API 로 알 수 없다(revisions 는 본문 스냅샷이라 무엇을 고쳤는지 나오지 않는다).
+  // 그래서 자기교정 성공을 칭찬하지 않고 다음에 고칠 것을 안내한다.
+  const latestErrorToFix = latestErrors?.errors[0]
 
   function startWriting() {
     resetWriting()
@@ -73,12 +76,12 @@ export function ChildHome() {
         </div>
 
         <div className="space-y-4">
-          {latestCorrection && (
+          {latestErrorToFix && (
             <section className="rounded-xl border border-ink/10 bg-white p-6">
-              <h2 className="mb-2 font-semibold">최근 자기교정 성공 🎉</h2>
+              <h2 className="mb-2 font-semibold">이번에 고쳐볼 것 ✏️</h2>
               <p className="text-sm text-ink/70">
-                지난번에 &apos;{latestCorrection.originalText}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
-                &apos;(으)로 고쳤어요. 정말 잘했어요!
+                지난 글에서 &apos;{latestErrorToFix.originalText}&apos;을(를) &apos;{latestErrorToFix.suggestion}
+                &apos;(으)로 고쳐보면 어때요?
               </p>
             </section>
           )}
