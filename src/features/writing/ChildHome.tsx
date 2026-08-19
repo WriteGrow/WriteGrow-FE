@@ -1,31 +1,39 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { DEV_CHILD_ID } from '../../lib/devChild'
+import { getWritingErrors, getWritings } from '../../lib/api'
+import type { WritingStatus } from '../../lib/apiTypes'
+import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
 import { useWritingStore } from '../../stores/writingStore'
-import { TOPICS } from '../../mocks/seed'
-import type { ErrorItem, Post } from '../../mocks/seed'
+import { TOPICS } from '../../lib/topics'
+
+// 서버는 글별 오류 개수를 주지 않는다. 개수 대신 글 상태로 라벨을 만든다.
+const STATUS_LABELS: Record<WritingStatus, string> = {
+  DRAFT: '쓰던 글',
+  SUBMITTED: '분석 중',
+  ANALYZED: '고칠 것 확인하기',
+  CONFIRMED: '수정 완료',
+  ANALYSIS_FAILED: '분석 실패',
+}
 
 export function ChildHome() {
   const navigate = useNavigate()
   const resetWriting = useWritingStore((s) => s.reset)
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['children', DEV_CHILD_ID, 'posts'],
-    queryFn: async (): Promise<Post[]> => {
-      const res = await fetch(`/api/children/${DEV_CHILD_ID}/posts`)
-      return res.json()
-    },
+  const { data: writings, isLoading } = useQuery({
+    queryKey: ['writings', DEV_CHILD_PROFILE_ID, 0, 5],
+    queryFn: () => getWritings({ page: 0, size: 5 }),
   })
+  const posts = writings?.content
 
-  const latestPostId = posts?.[0]?.id
+  const latestPostId = posts?.[0]?.writingId
   const { data: latestErrors } = useQuery({
-    queryKey: ['posts', latestPostId, 'errors'],
-    queryFn: async (): Promise<ErrorItem[]> => {
-      const res = await fetch(`/api/posts/${latestPostId}/errors`)
-      return res.json()
-    },
-    enabled: !!latestPostId,
+    queryKey: ['writings', latestPostId, 'errors'],
+    queryFn: () => getWritingErrors(latestPostId as number),
+    enabled: latestPostId !== undefined,
   })
-  const latestCorrection = latestErrors?.find((e) => e.confirmed)
+  // errors 는 교정 대상으로 확정된 오류, 즉 "아직 틀린 것"이다. 아이가 스스로 고쳤는지는
+  // 현재 API 로 알 수 없다(revisions 는 본문 스냅샷이라 무엇을 고쳤는지 나오지 않는다).
+  // 그래서 자기교정 성공을 칭찬하지 않고 다음에 고칠 것을 안내한다.
+  const latestErrorToFix = latestErrors?.errors[0]
 
   function startWriting() {
     resetWriting()
@@ -69,12 +77,25 @@ export function ChildHome() {
         </div>
 
         <div className="space-y-4">
-          {latestCorrection && (
+          {latestErrorToFix && (
             <section className="rounded-[10px] border border-black/10 bg-white p-5">
-              <h2 className="mb-2 text-[16px] font-semibold text-black">최근 자기교정 성공 🎉</h2>
+              <h2 className="mb-2 text-[16px] font-semibold text-black">이번에 고쳐볼 것 ✏️</h2>
               <p className="text-[12px] text-black/70">
-                지난번에 &apos;{latestCorrection.original}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
-                &apos;(으)로 고쳤어요. 정말 잘했어요!
+                지난 글에서 &apos;{latestErrorToFix.originalText}&apos;을(를) &apos;{latestErrorToFix.suggestion}
+                &apos;(으)로 고쳐보면 어때요?
+              </p>
+            </section>
+          )}
+
+          {latestErrors && latestErrors.status !== 'SUCCEEDED' && (
+            <section className="rounded-[10px] border border-black/10 bg-white p-5">
+              <h2 className="mb-2 text-[16px] font-semibold text-black">
+                {latestErrors.status === 'FAILED' ? '분석에 실패했어요' : '글을 분석하고 있어요'}
+              </h2>
+              <p className="text-[12px] text-black/70">
+                {latestErrors.status === 'FAILED'
+                  ? '잠시 후 다시 확인해 주세요.'
+                  : '분석이 끝나면 고칠 부분을 확인할 수 있어요.'}
               </p>
             </section>
           )}
@@ -93,18 +114,19 @@ export function ChildHome() {
             <p className="mb-3 text-[12px] text-black/50">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
             {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
             <ul className="space-y-2">
-              {posts?.slice(0, 5).map((post) => (
-                <li key={post.id}>
+              {posts?.map((post) => (
+                <li key={post.writingId}>
                   <button
                     type="button"
-                    onClick={() => navigate(`/child/posts/${post.id}`)}
+                    onClick={() => navigate(`/child/posts/${post.writingId}`)}
                     className="w-full rounded-[10px] border border-black/10 p-3 text-left"
                   >
                     <p className="text-[12px] text-black/50">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')} ·{' '}
-                      {post.errorCount > 0 ? '자기교정 성공' : '수정 완료'}
+                      {STATUS_LABELS[post.status]}
                     </p>
-                    <p className="text-[14px] font-semibold text-black">{post.title}</p>
+                    <p className="text-[14px] font-semibold text-black">{post.topic}</p>
+                    <p className="text-[12px] text-black/70">{post.preview}</p>
                   </button>
                 </li>
               ))}

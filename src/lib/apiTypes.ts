@@ -1,0 +1,82 @@
+export interface ApiResponse<T> {
+  success: true
+  data: T
+}
+
+export interface ApiErrorBody {
+  code: string
+  message: string
+  fieldErrors: Record<string, string[]> | null
+}
+
+export interface ErrorResponse {
+  success: false
+  error: ApiErrorBody
+}
+
+export type ApiEnvelope<T> = ApiResponse<T> | ErrorResponse
+
+export type WritingInputType = 'PEN' | 'KEYBOARD'
+
+export type WritingStatus = 'DRAFT' | 'SUBMITTED' | 'ANALYZED' | 'CONFIRMED' | 'ANALYSIS_FAILED'
+
+export interface PageResponse<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  last: boolean
+}
+
+export interface WritingSummaryResponse {
+  writingId: number
+  inputType: WritingInputType
+  status: WritingStatus
+  topic: string
+  preview: string
+  createdAt: string
+  submittedAt?: string | null
+}
+
+export interface WritingDetailResponse {
+  writingId: number
+  profileId: number
+  inputType: WritingInputType
+  status: WritingStatus
+  topic: string
+  originalText: string
+  finalText: string | null
+  createdAt: string
+  submittedAt?: string | null
+}
+
+export type WritingErrorType =
+  | 'SPELLING'
+  | 'SPACING'
+  | 'FINAL_CONSONANT'
+  | 'PARTICLE_ENDING'
+  | 'SENTENCE_STRUCTURE'
+  | 'VOCABULARY'
+
+export interface ErrorCandidateResponse {
+  errorType: WritingErrorType
+  errorTypeLabel: string
+  startIndex: number
+  endIndex: number
+  originalText: string
+  suggestion: string
+  confidence: number
+  reason: string | null
+}
+
+export type WritingAnalysisStatus = 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED'
+
+export interface WritingErrorsResponse {
+  writingId: number
+  status: WritingAnalysisStatus
+  analyzedText: string | null
+  errors: ErrorCandidateResponse[]
+  analyzedAt: string | null
+  failureReason: string | null
+}
