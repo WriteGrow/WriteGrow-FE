@@ -47,7 +47,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                     [
                       'rounded-md px-3 py-2.5 text-sm',
                       isActive
-                        ? 'bg-brand font-semibold text-white'
+                        ? 'bg-black font-semibold text-white'
                         : 'text-black/80 hover:bg-black/5',
                     ].join(' ')
                   }
@@ -80,16 +80,10 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             <input
               type="search"
               placeholder="검색"
-              className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-brand"
+              className="w-full rounded-[5px] border border-black/15 bg-white py-2 pl-9 pr-3 text-[14px] outline-none placeholder:text-black/40 focus:border-black"
             />
           </label>
-          <button
-            type="button"
-            onClick={goChild}
-            className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50 hover:bg-black/5"
-          >
-            역할 선택
-          </button>
+          <RoleSwitcher />
           <button
             type="button"
             className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50"
@@ -100,8 +94,6 @@ export function ParentLayout({ children }: { children: ReactNode }) {
 
         <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
-
-      <RoleSwitcher />
     </div>
   )
 }

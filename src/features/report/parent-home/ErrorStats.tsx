@@ -23,7 +23,7 @@ export function ErrorStats({ child }: { child: ParentChildSummary }) {
         <div className="flex justify-between gap-4">
           <dt className="text-black/50">지난 주 대비</dt>
           <dd
-            className={`font-medium ${delta < 0 ? 'text-brand' : delta > 0 ? 'text-red-700' : ''}`}
+            className={`font-medium ${delta > 0 ? 'text-red-700' : ''}`}
           >
             {errorDeltaLabel(delta)}
           </dd>

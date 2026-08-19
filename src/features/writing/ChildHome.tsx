@@ -6,6 +6,7 @@ import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
 import { useWritingStore } from '../../stores/writingStore'
 import { TOPICS } from '../../lib/topics'
 
+// 서버는 글별 오류 개수를 주지 않는다. 개수 대신 글 상태로 라벨을 만든다.
 const STATUS_LABELS: Record<WritingStatus, string> = {
   DRAFT: '쓰던 글',
   SUBMITTED: '분석 중',
@@ -41,32 +42,32 @@ export function ChildHome() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">안녕, 오늘도 글을 써볼까?</h1>
+      <h1 className="text-[16px] font-semibold text-black">안녕, 오늘도 글을 써볼까?</h1>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
-            <h2 className="mb-2 font-semibold">오늘의 글쓰기</h2>
-            <p className="mb-4 text-body text-ink/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
+            <h2 className="mb-2 text-[16px] font-semibold text-black">오늘의 글쓰기</h2>
+            <p className="mb-4 text-[14px] text-black/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
             <button
               type="button"
               onClick={startWriting}
-              className="min-h-touch w-full rounded-xl bg-brand px-6 text-body font-semibold text-white"
+              className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
             >
               새 글쓰기 시작하기
             </button>
           </section>
 
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
-            <h2 className="mb-1 font-semibold">오늘의 추천 주제</h2>
-            <p className="mb-3 text-sm text-ink/60">자유 선택</p>
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
+            <h2 className="mb-1 text-[16px] font-semibold text-black">오늘의 추천 주제</h2>
+            <p className="mb-3 text-[12px] text-black/50">자유 선택</p>
             <div className="flex flex-wrap gap-2">
               {TOPICS.map((topic) => (
                 <button
                   key={topic}
                   type="button"
                   onClick={startWriting}
-                  className="min-h-touch rounded-xl bg-brand-soft px-4 text-body text-brand"
+                  className="rounded-[5px] border border-black/15 px-4 py-2.5 text-[12px] text-black/70 hover:bg-black/5"
                 >
                   {topic}
                 </button>
@@ -77,9 +78,9 @@ export function ChildHome() {
 
         <div className="space-y-4">
           {latestErrorToFix && (
-            <section className="rounded-xl border border-ink/10 bg-white p-6">
-              <h2 className="mb-2 font-semibold">이번에 고쳐볼 것 ✏️</h2>
-              <p className="text-sm text-ink/70">
+            <section className="rounded-[10px] border border-black/10 bg-white p-5">
+              <h2 className="mb-2 text-[16px] font-semibold text-black">이번에 고쳐볼 것 ✏️</h2>
+              <p className="text-[12px] text-black/70">
                 지난 글에서 &apos;{latestErrorToFix.originalText}&apos;을(를) &apos;{latestErrorToFix.suggestion}
                 &apos;(으)로 고쳐보면 어때요?
               </p>
@@ -87,11 +88,11 @@ export function ChildHome() {
           )}
 
           {latestErrors && latestErrors.status !== 'SUCCEEDED' && (
-            <section className="rounded-xl border border-ink/10 bg-white p-6">
-              <h2 className="mb-2 font-semibold">
+            <section className="rounded-[10px] border border-black/10 bg-white p-5">
+              <h2 className="mb-2 text-[16px] font-semibold text-black">
                 {latestErrors.status === 'FAILED' ? '분석에 실패했어요' : '글을 분석하고 있어요'}
               </h2>
-              <p className="text-sm text-ink/70">
+              <p className="text-[12px] text-black/70">
                 {latestErrors.status === 'FAILED'
                   ? '잠시 후 다시 확인해 주세요.'
                   : '분석이 끝나면 고칠 부분을 확인할 수 있어요.'}
@@ -99,29 +100,33 @@ export function ChildHome() {
             </section>
           )}
 
-          <section className="rounded-xl border border-ink/10 bg-white p-6">
+          <section className="rounded-[10px] border border-black/10 bg-white p-5">
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-semibold">이전 글 기록</h2>
-              <button type="button" onClick={() => navigate('/child/posts')} className="text-sm text-brand">
+              <h2 className="text-[16px] font-semibold text-black">이전 글 기록</h2>
+              <button
+                type="button"
+                onClick={() => navigate('/child/posts')}
+                className="text-[14px] text-black/50 hover:text-black"
+              >
                 전체 보기
               </button>
             </div>
-            <p className="mb-3 text-sm text-ink/60">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
-            {isLoading && <p>불러오는 중...</p>}
+            <p className="mb-3 text-[12px] text-black/50">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
+            {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
             <ul className="space-y-2">
               {posts?.map((post) => (
                 <li key={post.writingId}>
                   <button
                     type="button"
                     onClick={() => navigate(`/child/posts/${post.writingId}`)}
-                    className="min-h-touch w-full rounded-lg border border-ink/10 p-3 text-left"
+                    className="w-full rounded-[10px] border border-black/10 p-3 text-left"
                   >
-                    <p className="text-xs text-ink/60">
+                    <p className="text-[12px] text-black/50">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')} ·{' '}
                       {STATUS_LABELS[post.status]}
                     </p>
-                    <p className="text-body font-semibold">{post.topic}</p>
-                    <p className="text-sm text-ink/60">{post.preview}</p>
+                    <p className="text-[14px] font-semibold text-black">{post.topic}</p>
+                    <p className="text-[12px] text-black/70">{post.preview}</p>
                   </button>
                 </li>
               ))}

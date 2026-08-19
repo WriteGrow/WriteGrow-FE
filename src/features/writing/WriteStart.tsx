@@ -34,7 +34,7 @@ export function WriteStart() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">무엇에 대해 써볼까?</h1>
+      <h1 className="text-[16px] font-semibold text-black">무엇에 대해 써볼까?</h1>
 
       <div className="flex flex-wrap gap-2">
         {TOPICS.map((topic) => (
@@ -42,8 +42,8 @@ export function WriteStart() {
             key={topic}
             type="button"
             onClick={() => setSelectedTopic(topic)}
-            className={`min-h-touch rounded-xl px-4 text-body ${
-              selectedTopic === topic ? 'bg-brand text-white' : 'bg-white text-ink'
+            className={`rounded-[5px] px-4 py-2.5 text-[12px] ${
+              selectedTopic === topic ? 'bg-black text-white' : 'border border-black/15 bg-white text-black/70'
             }`}
           >
             {topic}
@@ -56,14 +56,14 @@ export function WriteStart() {
           <button
             type="button"
             onClick={choosePen}
-            className="min-h-touch flex-1 rounded-xl bg-brand px-6 text-body font-semibold text-white"
+            className="flex-1 rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
           >
             펜으로 쓰기
           </button>
           <button
             type="button"
             onClick={chooseKeyboard}
-            className="min-h-touch flex-1 rounded-xl border border-brand px-6 text-body font-semibold text-brand"
+            className="flex-1 rounded-[5px] border border-black/20 px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-black/5"
           >
             키보드로 쓰기
           </button>
@@ -77,13 +77,13 @@ export function WriteStart() {
             onChange={(e) => setDraft(e.target.value)}
             placeholder="오늘 있었던 일을 자유롭게 써볼까?"
             rows={6}
-            className="w-full rounded-xl border border-ink/10 p-4 text-body"
+            className="w-full rounded-[5px] border border-black/15 p-4 text-[14px] outline-none placeholder:text-black/40 focus:border-black"
           />
           <button
             type="button"
             onClick={submitKeyboard}
             disabled={!draft.trim()}
-            className="min-h-touch w-full rounded-xl bg-brand px-6 text-body font-semibold text-white disabled:opacity-40"
+            className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
           >
             다 썼어요
           </button>

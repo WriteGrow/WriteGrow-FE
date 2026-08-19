@@ -1,18 +1,9 @@
 @import 'tailwindcss';
 
-/*
- * 저학년 접근성 토큰 — 초기값 제안 (docs/frontend-plan.md 참고).
- * 실기기 확인 후 조정 대상이며 최종값이 아니다.
- */
 @theme {
-  --spacing-touch: 56px; /* 터치 타깃 최소 크기 */
-  --text-body: 20px; /* 아동 화면 본문 크기 */
-
   /* --color-ink / --color-surface 조합은 대비 4.5:1 이상을 만족한다. */
   --color-ink: #1a1a1a;
   --color-surface: #ffffff;
-  --color-brand: #2b7f6a;
-  --color-brand-soft: #e3f2ee;
 }
 
 body {

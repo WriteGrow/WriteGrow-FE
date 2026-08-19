@@ -4,6 +4,7 @@ import { getWritings } from '../../lib/api'
 import type { WritingStatus } from '../../lib/apiTypes'
 import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
 
+// 서버는 글별 오류 개수를 주지 않는다. 개수 대신 글 상태로 라벨을 만든다.
 const STATUS_LABELS: Record<WritingStatus, string> = {
   DRAFT: '쓰던 글',
   SUBMITTED: '분석 중',
@@ -22,19 +23,19 @@ export function PostList() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">이전 글</h1>
-      {isLoading && <p className="text-body">불러오는 중...</p>}
+      <h1 className="text-[16px] font-semibold text-black">이전 글</h1>
+      {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
       <ul className="space-y-2">
         {posts?.map((post) => (
           <li key={post.writingId}>
             <button
               type="button"
               onClick={() => navigate(`/child/posts/${post.writingId}`)}
-              className="min-h-touch w-full rounded-lg bg-white p-4 text-left shadow-sm"
+              className="w-full rounded-[10px] border border-black/10 bg-white p-4 text-left"
             >
-              <p className="text-body font-semibold">{post.topic}</p>
-              <p className="text-sm text-ink/70">{post.preview}</p>
-              <p className="text-sm text-ink/60">
+              <p className="text-[14px] font-semibold text-black">{post.topic}</p>
+              <p className="text-[12px] text-black/70">{post.preview}</p>
+              <p className="text-[12px] text-black/50">
                 {new Date(post.createdAt).toLocaleDateString('ko-KR')} · {STATUS_LABELS[post.status]}
               </p>
             </button>

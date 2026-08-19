@@ -116,7 +116,7 @@ export function PenCanvas({
     <div className="flex h-full min-h-0 flex-col gap-2">
       <svg
         ref={svgRef}
-        className="min-h-0 w-full flex-1 touch-none rounded-xl border border-ink/10 bg-white"
+        className="min-h-0 w-full flex-1 touch-none rounded-[10px] border border-black/10 bg-white"
         style={{ cursor: tool === 'eraser' ? 'cell' : PEN_CURSOR }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
