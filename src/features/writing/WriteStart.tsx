@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TOPICS } from '../../mocks/seed'
+import { TOPICS } from '../../lib/topics'
 import { useWritingStore } from '../../stores/writingStore'
 
 export function WriteStart() {

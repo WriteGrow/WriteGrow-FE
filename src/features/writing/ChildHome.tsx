@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { DEV_CHILD_ID } from '../../lib/devChild'
 import { useWritingStore } from '../../stores/writingStore'
-import { TOPICS } from '../../mocks/seed'
+import { TOPICS } from '../../lib/topics'
 import type { ErrorItem, Post } from '../../mocks/seed'
 
 export function ChildHome() {

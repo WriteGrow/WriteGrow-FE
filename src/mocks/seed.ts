@@ -1,3 +1,5 @@
+import { TOPICS } from '../lib/topics'
+
 export interface Child {
   id: string
   name: string
@@ -28,14 +30,6 @@ export interface Post {
 export const children: Child[] = [
   { id: 'child-1', name: '민지', grade: 2 },
   { id: 'child-2', name: '도윤', grade: 3 },
-]
-
-export const TOPICS = [
-  '오늘 학교에서 있었던 일',
-  '주말에 가족과 한 일',
-  '내가 좋아하는 동물',
-  '가장 기억에 남는 여행',
-  '친구와 함께한 놀이',
 ]
 
 function makePost(index: number, childId: string): Post {
