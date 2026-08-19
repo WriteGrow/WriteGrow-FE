@@ -20,7 +20,7 @@ export function Result() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-[16px] font-semibold text-black">잘했어! 오늘도 한 편 완성했네</h1>
+      <h1 className="text-[16px] font-semibold text-black">잘했어! 오늘 글쓰기를 완성했네</h1>
 
       <section className="rounded-[10px] border border-black/10 bg-white p-5">
         <h2 className="mb-2 text-[16px] font-semibold text-black">{topic}</h2>
@@ -32,14 +32,17 @@ export function Result() {
           <h2 className="text-[16px] font-semibold text-black">이번에 고친 것들</h2>
           <ul className="space-y-2">
             {errors.map((error) => (
-              <li key={error.id} className="rounded-[10px] border border-black/10 bg-white p-3 text-[14px]">
-                {error.original} → {error.suggestion}
+              <li
+                key={`${error.errorType}-${error.startIndex}`}
+                className="rounded-[10px] border border-black/10 bg-white p-3 text-[14px]"
+              >
+                {error.originalText} → {error.suggestion}
               </li>
             ))}
           </ul>
         </section>
       ) : (
-        <p className="text-[14px] text-black/70">틀린 곳이 하나도 없었어. 정말 잘 썼어!</p>
+        <p className="text-[14px] text-black/70">고칠 것이 하나도 없었어. 정말 잘 썼어!</p>
       )}
 
       <div className="flex gap-3">
