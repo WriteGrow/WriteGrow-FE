@@ -15,10 +15,11 @@ export function Analyzing() {
   const topic = useWritingStore((s) => s.topic)
   const mode = useWritingStore((s) => s.mode)
   const content = useWritingStore((s) => s.content)
+  const writingId = useWritingStore((s) => s.writingId)
   const setWritingId = useWritingStore((s) => s.setWritingId)
   const setErrors = useWritingStore((s) => s.setErrors)
   const reset = useWritingStore((s) => s.reset)
-  const [submittedWritingId, setSubmittedWritingId] = useState<number | null>(null)
+  const [keyboardWritingId, setKeyboardWritingId] = useState<number | null>(null)
   const [pollDeadline, setPollDeadline] = useState<number | null>(null)
   const [timedOut, setTimedOut] = useState(false)
 
@@ -30,7 +31,7 @@ export function Analyzing() {
       })
       setWritingId(created.writingId)
       await submitWriting(created.writingId, mode === 'keyboard' ? { content } : {})
-      setSubmittedWritingId(created.writingId)
+      setKeyboardWritingId(created.writingId)
       setPollDeadline(Date.now() + MAX_ERROR_POLL_MS)
       return created.writingId
     },
@@ -39,12 +40,24 @@ export function Analyzing() {
   const startedRef = useRef(false)
 
   useEffect(() => {
-    if (startedRef.current || !topic || !mode || !content) return
+    if (startedRef.current || !topic || !mode) return
     startedRef.current = true
+    if (mode === 'pen') {
+      return
+    }
+    if (!content) return
     createAndSubmit.mutate()
     // The mutation must start once when this route is entered, including under StrictMode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const submittedWritingId = mode === 'pen' ? writingId : keyboardWritingId
+
+  useEffect(() => {
+    if (mode !== 'pen' || writingId === null || !content) return
+    const timeoutId = setTimeout(() => setTimedOut(true), MAX_ERROR_POLL_MS)
+    return () => clearTimeout(timeoutId)
+  }, [mode, writingId, content])
 
   const errorsQuery = useQuery<WritingErrorsResponse>({
     queryKey: ['writings', submittedWritingId, 'errors', 'submit-flow'],
@@ -98,7 +111,7 @@ export function Analyzing() {
     navigate('/child')
   }
 
-  if (!topic || !mode || !content) {
+  if (!topic || !mode || (mode === 'keyboard' && !content) || (mode === 'pen' && (writingId === null || !content))) {
     return <Navigate to="/child/write" replace />
   }
 
@@ -136,7 +149,9 @@ export function Analyzing() {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
       <div className="size-12 animate-spin rounded-full border-4 border-black/10 border-t-black" />
-      <p className="text-[14px] text-black">글을 저장하고 오류를 분석하고 있어요...</p>
+      <p className="text-[14px] text-black">
+        {mode === 'pen' ? '글의 오류를 분석하고 있어요...' : '글을 저장하고 오류를 분석하고 있어요...'}
+      </p>
     </div>
   )
 }
