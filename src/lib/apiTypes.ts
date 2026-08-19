@@ -39,6 +39,17 @@ export interface WritingSummaryResponse {
   submittedAt?: string | null
 }
 
+export interface WritingCreateResponse {
+  writingId: number
+  inputType: WritingInputType
+  status: WritingStatus
+}
+
+export interface WritingSubmitResponse {
+  writingId: number
+  status: WritingStatus
+}
+
 export interface WritingDetailResponse {
   writingId: number
   profileId: number
