@@ -6,7 +6,9 @@ import type { WritingErrorsResponse } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
 const ERROR_POLL_INTERVAL_MS = 1000
-const MAX_ERROR_POLLS = 30
+// 상한은 시간으로 잰다. 응답 횟수로 세면 요청이 계속 실패할 때 카운터가 올라가지 않아
+// 상한이 영영 걸리지 않는다.
+const MAX_ERROR_POLL_MS = 30_000
 
 export function Analyzing() {
   const navigate = useNavigate()
@@ -17,8 +19,8 @@ export function Analyzing() {
   const setErrors = useWritingStore((s) => s.setErrors)
   const reset = useWritingStore((s) => s.reset)
   const [submittedWritingId, setSubmittedWritingId] = useState<number | null>(null)
-  const [pollCount, setPollCount] = useState(0)
-  const lastDataUpdatedAt = useRef(0)
+  const [pollDeadline, setPollDeadline] = useState<number | null>(null)
+  const [timedOut, setTimedOut] = useState(false)
 
   const createAndSubmit = useMutation({
     mutationFn: async () => {
@@ -29,6 +31,7 @@ export function Analyzing() {
       setWritingId(created.writingId)
       await submitWriting(created.writingId, mode === 'keyboard' ? { content } : {})
       setSubmittedWritingId(created.writingId)
+      setPollDeadline(Date.now() + MAX_ERROR_POLL_MS)
       return created.writingId
     },
   })
@@ -50,16 +53,21 @@ export function Analyzing() {
     retry: false,
     refetchInterval: (query) => {
       const status = query.state.data?.status
-      if (status === 'SUCCEEDED' || status === 'FAILED' || pollCount >= MAX_ERROR_POLLS) return false
+      if (status === 'SUCCEEDED' || status === 'FAILED' || timedOut) return false
       return ERROR_POLL_INTERVAL_MS
     },
+    // 요청이 실패해도 폴링은 계속돼야 한다. 서버가 잠깐 흔들린 것일 수 있다.
+    // 대신 아래 deadline 타이머가 30초 뒤에 반드시 끊는다.
+    refetchIntervalInBackground: false,
   })
 
+  // 마감 시각이 지나면 상태와 무관하게 폴링을 끊는다. 요청이 계속 실패해도 여기서 걸린다.
   useEffect(() => {
-    if (!errorsQuery.dataUpdatedAt || errorsQuery.dataUpdatedAt === lastDataUpdatedAt.current) return
-    lastDataUpdatedAt.current = errorsQuery.dataUpdatedAt
-    setPollCount((count) => count + 1)
-  }, [errorsQuery.dataUpdatedAt])
+    if (pollDeadline === null || timedOut) return
+    const remaining = Math.max(pollDeadline - Date.now(), 0)
+    const id = setTimeout(() => setTimedOut(true), remaining)
+    return () => clearTimeout(id)
+  }, [pollDeadline, timedOut])
 
   useEffect(() => {
     const result = errorsQuery.data
@@ -68,14 +76,16 @@ export function Analyzing() {
     navigate(result.errors.length > 0 ? '/child/write/hint' : '/child/write/result', { replace: true })
   }, [errorsQuery.data, navigate, setErrors])
 
-  const timedOut = pollCount >= MAX_ERROR_POLLS && errorsQuery.data?.status !== 'SUCCEEDED' && errorsQuery.data?.status !== 'FAILED'
-  const analysisFailed = errorsQuery.data?.status === 'FAILED' || timedOut
+  // 세 가지를 모두 실패로 다뤄야 한다. 분석이 실패한 것(status FAILED), 시간이 초과된 것,
+  // 그리고 요청 자체가 실패한 것(errorsQuery.isError). 마지막을 빠뜨리면 서버 장애 때
+  // 아이가 빠져나갈 수 없는 스피너를 보게 된다.
+  const analysisFailed = errorsQuery.data?.status === 'FAILED' || timedOut || errorsQuery.isError
   const requestFailed = createAndSubmit.isError
 
   function retryAnalysis() {
     if (submittedWritingId !== null) {
-      setPollCount(0)
-      lastDataUpdatedAt.current = 0
+      setTimedOut(false)
+      setPollDeadline(Date.now() + MAX_ERROR_POLL_MS)
       void errorsQuery.refetch()
       return
     }
@@ -93,7 +103,11 @@ export function Analyzing() {
   }
 
   if (analysisFailed || requestFailed) {
-    const reason = errorsQuery.data?.failureReason ?? createAndSubmit.error?.message
+    const reason =
+      errorsQuery.data?.failureReason ??
+      createAndSubmit.error?.message ??
+      (errorsQuery.error instanceof Error ? errorsQuery.error.message : null) ??
+      (timedOut ? '시간이 너무 오래 걸리고 있어요.' : null)
     return (
       <div className="space-y-6 text-center">
         <h1 className="text-[16px] font-semibold text-black">분석에 실패했어요</h1>
