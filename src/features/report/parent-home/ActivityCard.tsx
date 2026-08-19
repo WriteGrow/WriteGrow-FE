@@ -27,7 +27,7 @@ export function ActivityCard({ child }: { child: ParentChildSummary }) {
         <p className="min-w-0 text-black/70">
           <span className="text-black/45">최근 글 : {child.recentTitle}</span>
         </p>
-        <button type="button" className="shrink-0 text-brand underline-offset-2 hover:underline">
+        <button type="button" className="shrink-0 text-black underline-offset-2 hover:underline">
           글 기록 보기
         </button>
       </div>

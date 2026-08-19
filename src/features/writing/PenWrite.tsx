@@ -70,19 +70,19 @@ export function PenWrite() {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold">{topic}</h1>
-        <p className="text-body text-ink/70">펜으로 편하게 써볼까?</p>
+        <h1 className="text-[16px] font-semibold text-black">{topic}</h1>
+        <p className="text-[14px] text-black/70">펜으로 편하게 써볼까?</p>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <div className="flex flex-wrap shrink-0 items-center gap-2">
-            <div className="flex shrink-0 gap-1 rounded-xl border border-ink/10 p-1">
+            <div className="flex shrink-0 gap-1 rounded-[5px] border border-black/15 p-1">
               <button
                 type="button"
                 onClick={() => setTool('pen')}
-                className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
-                  tool === 'pen' ? 'bg-brand text-white' : 'text-ink/70'
+                className={`shrink-0 whitespace-nowrap rounded-[5px] px-4 py-2 text-[12px] ${
+                  tool === 'pen' ? 'bg-black text-white' : 'text-black/70'
                 }`}
               >
                 펜
@@ -90,8 +90,8 @@ export function PenWrite() {
               <button
                 type="button"
                 onClick={() => setTool('eraser')}
-                className={`min-h-touch shrink-0 whitespace-nowrap rounded-lg px-4 text-body ${
-                  tool === 'eraser' ? 'bg-brand text-white' : 'text-ink/70'
+                className={`shrink-0 whitespace-nowrap rounded-[5px] px-4 py-2 text-[12px] ${
+                  tool === 'eraser' ? 'bg-black text-white' : 'text-black/70'
                 }`}
               >
                 지우개
@@ -104,9 +104,9 @@ export function PenWrite() {
                 disabled={history.length === 0}
                 aria-label="되돌리기"
                 title="되돌리기"
-                className="flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl border border-ink/10 disabled:opacity-40"
+                className="flex size-9 shrink-0 items-center justify-center rounded-[5px] border border-black/15 disabled:opacity-40"
               >
-                <Undo2 className="size-5" />
+                <Undo2 className="size-4" />
               </button>
               <button
                 type="button"
@@ -114,21 +114,21 @@ export function PenWrite() {
                 disabled={future.length === 0}
                 aria-label="다시하기"
                 title="다시하기"
-                className="flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl border border-ink/10 disabled:opacity-40"
+                className="flex size-9 shrink-0 items-center justify-center rounded-[5px] border border-black/15 disabled:opacity-40"
               >
-                <Redo2 className="size-5" />
+                <Redo2 className="size-4" />
               </button>
             </div>
           </div>
 
-          <label className="flex shrink-0 items-center gap-2 text-sm text-ink/70">
+          <label className="flex shrink-0 items-center gap-2 text-[12px] text-black/70">
             <button
               type="button"
               role="switch"
               aria-checked={stylusOnly}
               onClick={() => setStylusOnly((v) => !v)}
               className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-                stylusOnly ? 'bg-brand' : 'bg-ink/20'
+                stylusOnly ? 'bg-black' : 'bg-ink/20'
               }`}
             >
               <span
@@ -155,7 +155,7 @@ export function PenWrite() {
               type="button"
               onClick={clearAll}
               disabled={strokes.length === 0}
-              className="min-h-touch flex-1 rounded-xl border border-ink/10 px-6 text-body disabled:opacity-40"
+              className="flex-1 rounded-[5px] border border-black/15 px-4 py-2.5 text-[14px] disabled:opacity-40"
             >
               전체 지우기
             </button>
@@ -163,7 +163,7 @@ export function PenWrite() {
               type="button"
               onClick={() => ocrMutation.mutate(strokes.length)}
               disabled={strokes.length === 0 || ocrMutation.isPending}
-              className="min-h-touch flex-1 rounded-xl bg-brand px-6 text-body font-semibold text-white disabled:opacity-40"
+              className="flex-1 rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
             >
               {ocrMutation.isPending ? '읽는 중...' : '완료'}
             </button>
