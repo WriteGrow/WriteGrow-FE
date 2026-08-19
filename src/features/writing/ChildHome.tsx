@@ -1,31 +1,35 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { DEV_CHILD_ID } from '../../lib/devChild'
+import { getWritingErrors, getWritings } from '../../lib/api'
+import type { WritingStatus } from '../../lib/apiTypes'
+import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
 import { useWritingStore } from '../../stores/writingStore'
 import { TOPICS } from '../../lib/topics'
-import type { ErrorItem, Post } from '../../mocks/seed'
+
+const STATUS_LABELS: Record<WritingStatus, string> = {
+  DRAFT: '쓰던 글',
+  SUBMITTED: '분석 중',
+  ANALYZED: '고칠 것 확인하기',
+  CONFIRMED: '수정 완료',
+  ANALYSIS_FAILED: '분석 실패',
+}
 
 export function ChildHome() {
   const navigate = useNavigate()
   const resetWriting = useWritingStore((s) => s.reset)
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['children', DEV_CHILD_ID, 'posts'],
-    queryFn: async (): Promise<Post[]> => {
-      const res = await fetch(`/api/children/${DEV_CHILD_ID}/posts`)
-      return res.json()
-    },
+  const { data: writings, isLoading } = useQuery({
+    queryKey: ['writings', DEV_CHILD_PROFILE_ID, 0, 5],
+    queryFn: () => getWritings({ page: 0, size: 5 }),
   })
+  const posts = writings?.content
 
-  const latestPostId = posts?.[0]?.id
+  const latestPostId = posts?.[0]?.writingId
   const { data: latestErrors } = useQuery({
-    queryKey: ['posts', latestPostId, 'errors'],
-    queryFn: async (): Promise<ErrorItem[]> => {
-      const res = await fetch(`/api/posts/${latestPostId}/errors`)
-      return res.json()
-    },
-    enabled: !!latestPostId,
+    queryKey: ['writings', latestPostId, 'errors'],
+    queryFn: () => getWritingErrors(latestPostId as number),
+    enabled: latestPostId !== undefined,
   })
-  const latestCorrection = latestErrors?.find((e) => e.confirmed)
+  const latestCorrection = latestErrors?.errors[0]
 
   function startWriting() {
     resetWriting()
@@ -73,8 +77,21 @@ export function ChildHome() {
             <section className="rounded-xl border border-ink/10 bg-white p-6">
               <h2 className="mb-2 font-semibold">최근 자기교정 성공 🎉</h2>
               <p className="text-sm text-ink/70">
-                지난번에 &apos;{latestCorrection.original}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
+                지난번에 &apos;{latestCorrection.originalText}&apos;을(를) 스스로 &apos;{latestCorrection.suggestion}
                 &apos;(으)로 고쳤어요. 정말 잘했어요!
+              </p>
+            </section>
+          )}
+
+          {latestErrors && latestErrors.status !== 'SUCCEEDED' && (
+            <section className="rounded-xl border border-ink/10 bg-white p-6">
+              <h2 className="mb-2 font-semibold">
+                {latestErrors.status === 'FAILED' ? '분석에 실패했어요' : '글을 분석하고 있어요'}
+              </h2>
+              <p className="text-sm text-ink/70">
+                {latestErrors.status === 'FAILED'
+                  ? '잠시 후 다시 확인해 주세요.'
+                  : '분석이 끝나면 고칠 부분을 확인할 수 있어요.'}
               </p>
             </section>
           )}
@@ -89,18 +106,19 @@ export function ChildHome() {
             <p className="mb-3 text-sm text-ink/60">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
             {isLoading && <p>불러오는 중...</p>}
             <ul className="space-y-2">
-              {posts?.slice(0, 5).map((post) => (
-                <li key={post.id}>
+              {posts?.map((post) => (
+                <li key={post.writingId}>
                   <button
                     type="button"
-                    onClick={() => navigate(`/child/posts/${post.id}`)}
+                    onClick={() => navigate(`/child/posts/${post.writingId}`)}
                     className="min-h-touch w-full rounded-lg border border-ink/10 p-3 text-left"
                   >
                     <p className="text-xs text-ink/60">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')} ·{' '}
-                      {post.errorCount > 0 ? '자기교정 성공' : '수정 완료'}
+                      {STATUS_LABELS[post.status]}
                     </p>
-                    <p className="text-body font-semibold">{post.title}</p>
+                    <p className="text-body font-semibold">{post.topic}</p>
+                    <p className="text-sm text-ink/60">{post.preview}</p>
                   </button>
                 </li>
               ))}
