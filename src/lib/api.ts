@@ -18,6 +18,18 @@ import type {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '')
 
+/**
+ * 분석 레코드가 아직 만들어지지 않았다는 뜻의 404.
+ *
+ * 제출은 트랜잭션 커밋 뒤 별도 스레드에서 분석을 시작한다(HandwritingSubmittedEvent,
+ * TextConfirmedEvent). 그 스레드가 markProcessing 으로 레코드를 만들기 전에 폴링이
+ * 들어가면 서버는 ANALYSIS_NOT_FOUND 404 를 준다. 실패가 아니라 "아직"이므로
+ * 폴링을 계속해야 한다.
+ */
+export function isAnalysisPending(error: unknown): boolean {
+  return error instanceof ApiRequestError && error.status === 404 && error.code === 'ANALYSIS_NOT_FOUND'
+}
+
 export class ApiRequestError extends Error {
   readonly code: string
   readonly fieldErrors: Record<string, string[]> | null

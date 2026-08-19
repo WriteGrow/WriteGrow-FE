@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { confirmText, getAnalysis, rewriteWriting } from '../../lib/api'
+import { confirmText, getAnalysis, isAnalysisPending, rewriteWriting } from '../../lib/api'
 import type { AnalysisResponse } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
@@ -29,6 +29,10 @@ export function OcrConfirm() {
     },
     refetchIntervalInBackground: false,
   })
+
+  // 분석 레코드가 아직 없어서 나는 404 는 실패가 아니라 "아직"이다. 폴링을 계속한다.
+  const analysisNotReady = isAnalysisPending(analysisQuery.error)
+  const analysisRequestFailed = analysisQuery.isError && !analysisNotReady
 
   const analysisStatus = analysisQuery.data?.status
   const analysisSettled = analysisStatus === 'SUCCEEDED' || analysisStatus === 'FAILED'
@@ -66,7 +70,7 @@ export function OcrConfirm() {
   // 성공한 분석은 어떤 경우에도 실패로 뒤집지 않는다.
   const analysisFailed =
     analysisStatus !== 'SUCCEEDED' &&
-    (analysisStatus === 'FAILED' || timedOut || analysisQuery.isError)
+    (analysisStatus === 'FAILED' || timedOut || analysisRequestFailed)
   if (analysisFailed) {
     const reason =
       analysisQuery.data?.failureReason ??

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { createWriting, getWritingErrors, submitWriting } from '../../lib/api'
+import { createWriting, getWritingErrors, isAnalysisPending, submitWriting } from '../../lib/api'
 import type { WritingErrorsResponse } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
@@ -95,8 +95,10 @@ export function Analyzing() {
   // 성공한 분석은 어떤 경우에도 실패로 뒤집지 않는다. 성공하면 바로 다음 화면으로
   // 넘어가지만, 이동 직전 렌더나 느린 기기에서 실패 화면이 깜빡일 수 있다.
   const errorsStatus = errorsQuery.data?.status
+  // 분석 레코드가 아직 없어서 나는 404 는 실패가 아니라 "아직"이다. 폴링을 계속한다.
+  const errorsRequestFailed = errorsQuery.isError && !isAnalysisPending(errorsQuery.error)
   const analysisFailed =
-    errorsStatus !== 'SUCCEEDED' && (errorsStatus === 'FAILED' || timedOut || errorsQuery.isError)
+    errorsStatus !== 'SUCCEEDED' && (errorsStatus === 'FAILED' || timedOut || errorsRequestFailed)
   const requestFailed = createAndSubmit.isError
 
   function retryAnalysis() {
