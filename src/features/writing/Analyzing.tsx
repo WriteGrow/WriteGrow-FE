@@ -92,7 +92,11 @@ export function Analyzing() {
   // 세 가지를 모두 실패로 다뤄야 한다. 분석이 실패한 것(status FAILED), 시간이 초과된 것,
   // 그리고 요청 자체가 실패한 것(errorsQuery.isError). 마지막을 빠뜨리면 서버 장애 때
   // 아이가 빠져나갈 수 없는 스피너를 보게 된다.
-  const analysisFailed = errorsQuery.data?.status === 'FAILED' || timedOut || errorsQuery.isError
+  // 성공한 분석은 어떤 경우에도 실패로 뒤집지 않는다. 성공하면 바로 다음 화면으로
+  // 넘어가지만, 이동 직전 렌더나 느린 기기에서 실패 화면이 깜빡일 수 있다.
+  const errorsStatus = errorsQuery.data?.status
+  const analysisFailed =
+    errorsStatus !== 'SUCCEEDED' && (errorsStatus === 'FAILED' || timedOut || errorsQuery.isError)
   const requestFailed = createAndSubmit.isError
 
   function retryAnalysis() {

@@ -30,11 +30,16 @@ export function OcrConfirm() {
     refetchIntervalInBackground: false,
   })
 
+  const analysisStatus = analysisQuery.data?.status
+  const analysisSettled = analysisStatus === 'SUCCEEDED' || analysisStatus === 'FAILED'
+
+  // 분석이 끝나면 타이머를 걸지 않는다. 걸어 두면 아이가 변환 결과를 읽고 고치는
+  // 동안 30초가 지나 성공한 화면이 실패 화면으로 덮인다.
   useEffect(() => {
-    if (timedOut) return
+    if (timedOut || analysisSettled) return
     const timeoutId = setTimeout(() => setTimedOut(true), MAX_ANALYSIS_POLL_MS)
     return () => clearTimeout(timeoutId)
-  }, [timedOut])
+  }, [timedOut, analysisSettled])
 
   const text = editedText ?? analysisQuery.data?.fullText ?? ''
 
@@ -58,8 +63,10 @@ export function OcrConfirm() {
     return <Navigate to="/child/write" replace />
   }
 
+  // 성공한 분석은 어떤 경우에도 실패로 뒤집지 않는다.
   const analysisFailed =
-    analysisQuery.data?.status === 'FAILED' || timedOut || analysisQuery.isError
+    analysisStatus !== 'SUCCEEDED' &&
+    (analysisStatus === 'FAILED' || timedOut || analysisQuery.isError)
   if (analysisFailed) {
     const reason =
       analysisQuery.data?.failureReason ??
