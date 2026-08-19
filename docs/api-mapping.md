@@ -233,17 +233,83 @@ export type Stroke = number[][] // [x, y, pressure][]
 `Analyzing.tsx`는 지금 글 생성과 분석을 하나의 mutation으로 끝낸다.
 `POST /api/ocr`도 `{ strokeCount }`를 보내 텍스트를 받는데, **이 엔드포인트는 실제로 존재하지 않는다.** 목에만 있는 가짜다.
 
-실제 플로우는 단계가 더 많고 비동기다.
+자세한 계약은 아래 5절에 있다. 키보드와 손글씨는 플로우가 다르고, 손글씨만 OCR 변환 단계를 거친다.
+
+## 5. 제출과 분석 (④)
+
+### 분석이 두 종류다
+
+이걸 뭉뚱그리면 안 된다. 이름이 비슷하지만 다른 것이다.
+
+| | 엔드포인트 | 대상 | 무엇 |
+| --- | --- | --- | --- |
+| OCR 변환 분석 | `GET /api/writings/{id}/analysis` | **손글씨 전용** | 획을 텍스트로 변환. `fullText`, `segments`, `processMetric` |
+| 오류 분석 | `GET /api/writings/{id}/errors` | 키보드·손글씨 공통 | 교정 대상 오류. `ErrorCandidateResponse[]` |
+
+라이브 서버에서 확인한 결과다.
 
 ```
-POST  /api/writings                → writingId, status: DRAFT
-      PEN      → POST /{id}/strokes (배치) + POST /{id}/handwriting-image
-      KEYBOARD → PATCH /{id}
-POST  /{id}/submit                 → 202, analysisInProgress: true
-GET   /{id}/analysis               → 폴링: PENDING | PROCESSING → SUCCEEDED | FAILED
-PATCH /{id}/text                   → 최종본 확정, status: CONFIRMED
-GET   /{id}/errors                 → 교정 대상 오류
+GET /api/writings/1/analysis   (KEYBOARD)
+→ HTTP 400  {"code":"NOT_HANDWRITING","message":"손글씨로 쓴 글에만 사용할 수 있어요."}
 ```
 
-폴링, `ANALYSIS_FAILED` 처리, 재시도(`POST /{id}/analysis/retry`), 409 충돌 처리가 새로 필요하다.
-`OcrConfirm` → `Analyzing` 구간의 화면 순서 자체가 바뀌므로 조회 화면과 같은 PR에 넣지 않는다.
+**키보드 글에서 `/analysis`를 호출하면 400이다.** 절대 부르지 않는다.
+
+### 키보드 플로우
+
+```
+POST /api/writings              {inputType: "KEYBOARD", topic}  → writingId, DRAFT
+POST /api/writings/{id}/submit  {content}                       → CONFIRMED (즉시)
+GET  /api/writings/{id}/errors                                  → 폴링
+```
+
+제출 즉시 `CONFIRMED`다. OCR 변환이 없으니 `PATCH /{id}/text`도 부르지 않는다.
+
+`PATCH /api/writings/{id}`(임시 저장)는 쓰지 않는다. `WriteStart`가 본문을 다 받은 뒤 `Analyzing`으로 넘어가므로
+중간 저장 시점이 없다. `submit`이 `content`를 함께 보낸다. 작성 중 자동 저장이 요구사항이 되면 그때 별도로 다룬다.
+
+### 손글씨 플로우 (다음 이슈)
+
+```
+POST  /api/writings                     {inputType: "PEN", topic}  → writingId, DRAFT
+POST  /api/writings/{id}/strokes        (배치, batchSeq 0부터)
+POST  /api/writings/{id}/handwriting-image  (multipart PNG)
+POST  /api/writings/{id}/submit         (content 없이)             → 202, SUBMITTED
+GET   /api/writings/{id}/analysis                                  → 폴링 → SUCCEEDED
+PATCH /api/writings/{id}/text           {content}                  → CONFIRMED
+  또는 POST /api/writings/{id}/rewrite                             → DRAFT 로 되돌림
+GET   /api/writings/{id}/errors                                    → 폴링
+```
+
+`rewrite`는 새 글을 만들지 않고 같은 글을 `DRAFT`로 되돌린다. 손글씨 원본과 획 데이터는 보존되고 시도 번호만 올라가므로
+클라이언트는 `batchSeq`를 다시 0부터 보낸다.
+
+`segments[].lowConfidence`가 true인 구절은 확신도 미달이라 **아동에게 오류로 확정해 보여주지 않는다.** 별도 안내로만 표시한다.
+
+### 폴링 규칙
+
+`/errors`와 `/analysis` 모두 `status`가 `PENDING` → `PROCESSING` → `SUCCEEDED` 또는 `FAILED`로 간다.
+
+React Query의 `refetchInterval`이 종결 상태에서 `false`를 반환하는 형태로 만든다. 별도 타이머를 손으로 돌리지 않는다.
+서버가 `AI_STUB=true`라 지금은 즉시 끝나지만, 실제 AI가 붙으면 느려진다. 무한 폴링을 막는 상한을 둔다.
+
+### `FAILED` 처리 — 키보드는 재시도 엔드포인트가 없다
+
+`POST /api/writings/{id}/analysis/retry`는 `/analysis` 아래에 있어 손글씨 전용으로 보인다.
+키보드 글의 오류 분석이 실패했을 때 다시 돌릴 엔드포인트가 없다.
+
+당장은 `/errors`를 다시 조회하는 "다시 시도"와 홈으로 돌아가는 경로만 둔다.
+키보드용 재분석 엔드포인트가 필요한지는 백엔드와 정해야 하는 열린 질문이다.
+
+### 오류 필드 활용
+
+`ErrorCandidateResponse`에는 `reason`이 있다(예: `"'았'의 받침 표기"`). 서버가 판단 근거를 문장으로 준다.
+`Hint.tsx`의 힌트 단계에 쓸 수 있다. `errorTypeLabel`도 한글(`받침`)이라 그대로 쓴다.
+
+### 목을 실 스펙으로 정렬한다
+
+3절에서 미룬 부채를 여기서 갚는다. MSW의 s2 쓰기 핸들러를 실제 응답 형태로 다시 쓰고,
+`src/lib/api.ts`의 목 변환 어댑터(`mapMockPost`, `mapMockDetail`, `mapMockError`, `mockWritingId`, `mockPostId`)를 삭제한다.
+핸들러가 실 형태로 응답하면 두 모드가 같은 코드 경로를 타므로 어댑터가 필요 없다.
+
+s3(`/api/parent/home` 등)와 PEN 목 핸들러(`/api/ocr`)는 건드리지 않는다. 목 모드에서 계속 동작해야 한다.

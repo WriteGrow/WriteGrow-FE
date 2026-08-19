@@ -32,8 +32,11 @@ export function Result() {
           <h2 className="text-[16px] font-semibold text-black">이번에 고친 것들</h2>
           <ul className="space-y-2">
             {errors.map((error) => (
-              <li key={error.id} className="rounded-[10px] border border-black/10 bg-white p-3 text-[14px]">
-                {error.original} → {error.suggestion}
+              <li
+                key={`${error.errorType}-${error.startIndex}`}
+                className="rounded-[10px] border border-black/10 bg-white p-3 text-[14px]"
+              >
+                {error.originalText} → {error.suggestion}
               </li>
             ))}
           </ul>

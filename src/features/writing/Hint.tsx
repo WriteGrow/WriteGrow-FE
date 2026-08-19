@@ -18,8 +18,7 @@ export function Hint() {
     if (errors.length === 0 || hintIndex >= errors.length) {
       navigate('/child/write/result', { replace: true })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errors.length, hintIndex])
+  }, [errors.length, hintIndex, navigate])
 
   const current = errors[hintIndex]
   if (!current) return null
@@ -54,11 +53,13 @@ export function Hint() {
       <h1 className="text-[16px] font-semibold text-black">여기, 다시 한 번 볼까?</h1>
 
       <p className="rounded-[10px] border border-black/10 bg-white p-4 text-[14px] text-black">
-        {current.type} 부분을 확인해봐 — <mark className="bg-black/10">{current.original}</mark>
+        {current.errorTypeLabel} 부분을 확인해봐 — <mark className="bg-black/10">{current.originalText}</mark>
       </p>
 
       {hintLevel >= 1 && !revealed && (
-        <p className="text-[14px] text-black/70">힌트: '{current.suggestion[0]}'으로 시작해</p>
+        <p className="text-[14px] text-black/70">
+          힌트: {current.reason ?? `'${current.suggestion[0]}'으로 시작해`}
+        </p>
       )}
       {revealed && <p className="text-[14px] font-semibold text-black">정답: {current.suggestion}</p>}
 
