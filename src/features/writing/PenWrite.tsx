@@ -2,18 +2,28 @@ import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Redo2, Undo2 } from 'lucide-react'
-import { PenCanvas, type PenTool, type Stroke } from '../../lib/pen/PenCanvas'
+import {
+  PenCanvas,
+  type CanvasSize,
+  type PenTool,
+  type Stroke,
+} from '../../lib/pen/PenCanvas'
+import { rasterizeStrokes } from '../../lib/pen/rasterize'
+import { appendStrokes, createWriting, submitWriting, uploadHandwritingImage } from '../../lib/api'
+import type { StrokeData } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
 export function PenWrite() {
   const navigate = useNavigate()
   const topic = useWritingStore((s) => s.topic)
   const mode = useWritingStore((s) => s.mode)
-  const setContent = useWritingStore((s) => s.setContent)
+  const writingId = useWritingStore((s) => s.writingId)
+  const setWritingId = useWritingStore((s) => s.setWritingId)
   const [strokes, setStrokes] = useState<Stroke[]>([])
   const [history, setHistory] = useState<Stroke[][]>([])
   const [future, setFuture] = useState<Stroke[][]>([])
-  const [livePoints, setLivePoints] = useState<Stroke>([])
+  const [liveStroke, setLiveStroke] = useState<Stroke | null>(null)
+  const [canvasSize, setCanvasSize] = useState<CanvasSize | null>(null)
   const [tool, setTool] = useState<PenTool>('pen')
   const [stylusOnly, setStylusOnly] = useState(true)
 
@@ -46,26 +56,29 @@ export function PenWrite() {
     setFuture([])
   }
 
-  const ocrMutation = useMutation({
-    mutationFn: async (strokeCount: number): Promise<{ text: string }> => {
-      const res = await fetch('/api/ocr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strokeCount }),
-      })
-      return res.json()
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      if (!topic || strokes.length === 0 || !canvasSize) {
+        throw new Error('손글씨를 보낼 준비가 되지 않았어요.')
+      }
+
+      const id = writingId ?? (await createWriting({ inputType: 'PEN', topic })).writingId
+      setWritingId(id)
+      const strokeData: StrokeData[] = strokes.map((stroke, index) => ({ ...stroke, index }))
+      await appendStrokes(id, { batchSeq: 0, strokes: strokeData })
+      const image = await rasterizeStrokes(strokes, canvasSize)
+      await uploadHandwritingImage(id, image, canvasSize)
+      await submitWriting(id)
+      return id
     },
-    onSuccess: ({ text }) => {
-      setContent(text)
-      navigate('/child/write/ocr')
-    },
+    onSuccess: () => navigate('/child/write/ocr'),
   })
 
   if (!topic || mode !== 'pen') {
     return <Navigate to="/child/write" replace />
   }
 
-  const totalPoints = strokes.reduce((sum, s) => sum + s.length, 0) + livePoints.length
+  const totalPoints = strokes.reduce((sum, s) => sum + s.points.length, 0) + (liveStroke?.points.length ?? 0)
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -144,11 +157,18 @@ export function PenWrite() {
             <PenCanvas
               strokes={strokes}
               onStrokesChange={commitStrokes}
-              onLiveStrokeChange={setLivePoints}
+              onLiveStrokeChange={setLiveStroke}
+              onCanvasSizeChange={setCanvasSize}
               tool={tool}
               stylusOnly={stylusOnly}
             />
           </div>
+
+          {submitMutation.isError && (
+            <p role="alert" className="text-[14px] text-red-700">
+              {submitMutation.error instanceof Error ? submitMutation.error.message : '글을 보내지 못했어요.'}
+            </p>
+          )}
 
           <div className="flex shrink-0 gap-3">
             <button
@@ -161,11 +181,11 @@ export function PenWrite() {
             </button>
             <button
               type="button"
-              onClick={() => ocrMutation.mutate(strokes.length)}
-              disabled={strokes.length === 0 || ocrMutation.isPending}
+              onClick={() => submitMutation.mutate()}
+              disabled={strokes.length === 0 || canvasSize === null || submitMutation.isPending}
               className="flex-1 rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90 disabled:opacity-40"
             >
-              {ocrMutation.isPending ? '읽는 중...' : '완료'}
+              {submitMutation.isPending ? '읽는 중...' : '완료'}
             </button>
           </div>
         </div>
@@ -177,29 +197,29 @@ export function PenWrite() {
               완성된 획 {strokes.length}개 · 총 {totalPoints}점 (지우기 전까지 계속 기록됨)
             </p>
             <div className="min-h-0 flex-1 overflow-y-auto rounded-lg bg-ink/5 p-2 font-mono text-xs">
-              {strokes.length === 0 && livePoints.length === 0 && (
+              {strokes.length === 0 && liveStroke === null && (
                 <p className="text-ink/40">펜을 움직이면 좌표가 표시돼요.</p>
               )}
               {strokes.map((stroke, strokeIdx) => (
                 <details key={strokeIdx} className="mb-1 rounded border border-ink/10">
                   <summary className="cursor-pointer select-none px-2 py-1 text-ink/60">
-                    획 {strokeIdx + 1} ({stroke.length}점)
+                    획 {strokeIdx + 1} ({stroke.points.length}점)
                   </summary>
                   <div className="border-t border-ink/10 px-2 py-1">
-                    {stroke.map(([x, y, pressure], i) => (
+                    {stroke.points.map(({ x, y, pressure }, i) => (
                       <div key={i}>
-                        x:{x.toFixed(1)} y:{y.toFixed(1)} p:{pressure.toFixed(2)}
+                        x:{x.toFixed(1)} y:{y.toFixed(1)} p:{pressure === null ? '미지원' : pressure.toFixed(2)}
                       </div>
                     ))}
                   </div>
                 </details>
               ))}
-              {livePoints.length > 0 && (
+              {liveStroke && liveStroke.points.length > 0 && (
                 <div>
-                  <p className="text-ink/50">진행 중인 획 ({livePoints.length}점)</p>
-                  {livePoints.map(([x, y, pressure], i) => (
+                  <p className="text-ink/50">진행 중인 획 ({liveStroke.points.length}점)</p>
+                  {liveStroke.points.map(({ x, y, pressure }, i) => (
                     <div key={i}>
-                      x:{x.toFixed(1)} y:{y.toFixed(1)} p:{pressure.toFixed(2)}
+                      x:{x.toFixed(1)} y:{y.toFixed(1)} p:{pressure === null ? '미지원' : pressure.toFixed(2)}
                     </div>
                   ))}
                 </div>

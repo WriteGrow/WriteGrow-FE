@@ -1,8 +1,27 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getStroke } from 'perfect-freehand'
 
-export type Stroke = number[][] // [x, y, pressure][]
 export type PenTool = 'pen' | 'eraser'
+
+export interface StrokePoint {
+  x: number
+  y: number
+  t: number
+  pressure: number | null
+}
+
+export interface TimedStroke {
+  penDownAt: number
+  penUpAt: number
+  points: StrokePoint[]
+}
+
+export type Stroke = TimedStroke
+
+export interface CanvasSize {
+  canvasWidth: number
+  canvasHeight: number
+}
 
 interface Diagnostic {
   pressure: number
@@ -14,7 +33,7 @@ interface Diagnostic {
 const ERASE_RADIUS = 14
 
 function isStrokeNear(stroke: Stroke, x: number, y: number, radius: number): boolean {
-  return stroke.some(([px, py]) => Math.hypot(px - x, py - y) <= radius)
+  return stroke.points.some(({ x: px, y: py }) => Math.hypot(px - x, py - y) <= radius)
 }
 
 // lucide "pencil" 아이콘을 그대로 커서로 사용 — 필기 팁(좌하단)이 실제 포인터 위치에 오도록 핫스팟을 잡는다.
@@ -41,23 +60,57 @@ export function PenCanvas({
   strokes,
   onStrokesChange,
   onLiveStrokeChange,
+  onCanvasSizeChange,
   tool = 'pen',
   stylusOnly = true,
 }: {
   strokes: Stroke[]
   onStrokesChange: (strokes: Stroke[]) => void
-  onLiveStrokeChange?: (points: Stroke) => void
+  onLiveStrokeChange?: (stroke: Stroke | null) => void
+  onCanvasSizeChange?: (size: CanvasSize) => void
   tool?: PenTool
   stylusOnly?: boolean
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [current, setCurrent] = useState<Stroke>([])
+  const [current, setCurrent] = useState<Stroke | null>(null)
   const [erasing, setErasing] = useState(false)
   const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null)
+  const sessionStartRef = useRef<number | null>(null)
 
   useEffect(() => {
     onLiveStrokeChange?.(current)
   }, [current, onLiveStrokeChange])
+
+  useEffect(() => {
+    sessionStartRef.current = performance.now()
+  }, [])
+
+  useEffect(() => {
+    if (!onCanvasSizeChange || !svgRef.current) return
+    const reportSize = () => {
+      if (!svgRef.current) return
+      const rect = svgRef.current.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        onCanvasSizeChange({ canvasWidth: Math.round(rect.width), canvasHeight: Math.round(rect.height) })
+      }
+    }
+    reportSize()
+    const observer = new ResizeObserver(reportSize)
+    observer.observe(svgRef.current)
+    return () => observer.disconnect()
+  }, [onCanvasSizeChange])
+
+  function elapsedTime() {
+    const start = sessionStartRef.current ?? performance.now()
+    sessionStartRef.current ??= start
+    return Math.round(performance.now() - start)
+  }
+
+  function pressureFor(e: ReactPointerEvent<SVGSVGElement>): number | null {
+    // Pointer events expose a default pressure for mouse/touch. Only stylus
+    // events carry the pressure that the handwriting API should receive.
+    return e.pointerType === 'pen' && Number.isFinite(e.pressure) ? e.pressure : null
+  }
 
   function toLocal(e: ReactPointerEvent<SVGSVGElement>): [number, number] {
     const rect = svgRef.current!.getBoundingClientRect()
@@ -85,7 +138,12 @@ export function PenCanvas({
       eraseAt(x, y)
       return
     }
-    setCurrent([[x, y, e.pressure || 0.5]])
+    const t = elapsedTime()
+    setCurrent({
+      penDownAt: t,
+      penUpAt: t,
+      points: [{ x, y, t, pressure: pressureFor(e) }],
+    })
   }
 
   function handlePointerMove(e: ReactPointerEvent<SVGSVGElement>) {
@@ -96,8 +154,18 @@ export function PenCanvas({
       if (erasing) eraseAt(x, y)
       return
     }
-    if (current.length === 0) return
-    setCurrent((prev) => [...prev, [x, y, e.pressure || 0.5]])
+    if (!current) return
+    const t = elapsedTime()
+    const pressure = pressureFor(e)
+    setCurrent((prev) =>
+      prev
+        ? {
+            ...prev,
+            penUpAt: t,
+            points: [...prev.points, { x, y, t, pressure }],
+          }
+        : prev,
+    )
   }
 
   function handlePointerUp() {
@@ -105,12 +173,12 @@ export function PenCanvas({
       setErasing(false)
       return
     }
-    if (current.length === 0) return
-    onStrokesChange([...strokes, current])
-    setCurrent([])
+    if (!current) return
+    onStrokesChange([...strokes, { ...current, penUpAt: elapsedTime() }])
+    setCurrent(null)
   }
 
-  const visibleStrokes = current.length ? [...strokes, current] : strokes
+  const visibleStrokes = current ? [...strokes, current] : strokes
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
@@ -124,7 +192,13 @@ export function PenCanvas({
         onPointerCancel={handlePointerUp}
       >
         {visibleStrokes.map((stroke, i) => (
-          <path key={i} d={getSvgPathFromStroke(getStroke(stroke, { size: 6 }))} fill="var(--color-ink)" />
+          <path
+            key={i}
+            d={getSvgPathFromStroke(
+              getStroke(stroke.points.map(({ x, y, pressure }) => [x, y, pressure ?? 0.5]), { size: 6 }),
+            )}
+            fill="var(--color-ink)"
+          />
         ))}
       </svg>
       {import.meta.env.DEV && diagnostic && (
