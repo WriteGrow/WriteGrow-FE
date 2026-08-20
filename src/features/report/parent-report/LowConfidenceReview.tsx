@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 
 export function LowConfidenceReview({
-  childId,
+  childProfileId,
   pendingCount,
 }: {
-  childId: string
+  childProfileId: number
   pendingCount: number
 }) {
   return (
@@ -16,7 +16,7 @@ export function LowConfidenceReview({
           <p>확정 전 보호자가 직접 확인하여 아동 교정에 반영 여부를 결정합니다.</p>
         </div>
         <Link
-          to={`/parent/children/${childId}/review`}
+          to={`/parent/children/${childProfileId}/review`}
           className="shrink-0 rounded-[5px] bg-black px-4 py-2 text-center text-[12px] font-semibold text-white hover:bg-black/90"
         >
           낮은 확신도 오류 검토하기

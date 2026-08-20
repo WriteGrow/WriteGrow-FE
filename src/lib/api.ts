@@ -6,6 +6,7 @@ import type {
   HandwritingImageUploadResponse,
   PageResponse,
   ParentHomeResponse,
+  ParentWritingDetailResponse,
   StrokeBatchAppendResponse,
   StrokeData,
   WritingCreateResponse,
@@ -15,6 +16,7 @@ import type {
   WritingSubmitResponse,
   WritingTextConfirmResponse,
   WritingSummaryResponse,
+  WeeklyReportResponse,
 } from './apiTypes'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '')
@@ -111,10 +113,17 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body.data
 }
 
-export async function getWritings(options: { page?: number; size?: number } = {}): Promise<PageResponse<WritingSummaryResponse>> {
+export async function getWritings(
+  options: { page?: number; size?: number; profileId?: number } = {},
+): Promise<PageResponse<WritingSummaryResponse>> {
   const page = options.page ?? 0
   const size = options.size ?? 5
-  return request<PageResponse<WritingSummaryResponse>>(`/api/writings?page=${page}&size=${size}`)
+  const headers = options.profileId
+    ? { 'X-Profile-Id': String(options.profileId) }
+    : undefined
+  return request<PageResponse<WritingSummaryResponse>>(`/api/writings?page=${page}&size=${size}`, {
+    ...(headers ? { headers } : {}),
+  })
 }
 
 export async function getWriting(writingId: number): Promise<WritingDetailResponse> {
@@ -194,4 +203,24 @@ export async function getParentHome(): Promise<ParentHomeResponse> {
   return request<ParentHomeResponse>('/api/parents/home', {
     headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
   })
+}
+
+export async function getChildWeeklyReport(
+  childProfileId: number,
+  options: { weekOf?: string } = {},
+): Promise<WeeklyReportResponse> {
+  const query = options.weekOf ? `?weekOf=${encodeURIComponent(options.weekOf)}` : ''
+  return request<WeeklyReportResponse>(`/api/children/${childProfileId}/weekly-report${query}`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
+}
+
+export async function getChildWriting(
+  childProfileId: number,
+  writingId: number,
+): Promise<ParentWritingDetailResponse> {
+  return request<ParentWritingDetailResponse>(
+    `/api/children/${childProfileId}/writings/${writingId}`,
+    { headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) } },
+  )
 }

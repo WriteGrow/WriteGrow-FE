@@ -35,7 +35,7 @@ export function ActivityCard({ child }: { child: ParentHomeChild }) {
       </div>
 
       <Link
-        to={`/parent/children/child-${child.profileId}/report`}
+        to={`/parent/children/${child.profileId}/report`}
         className="mt-auto block w-full rounded-[5px] bg-black px-4 py-2.5 text-center text-[12px] font-semibold text-white hover:bg-black/90"
       >
         주간 성장 리포트 보기

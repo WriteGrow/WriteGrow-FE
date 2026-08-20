@@ -1,12 +1,12 @@
-import type { ParentPostDetail } from '../../../mocks/seed'
+import type { ParentWritingDetailResponse } from '../../../lib/apiTypes'
 
-export function PostCompareSection({ post }: { post: ParentPostDetail }) {
+export function PostCompareSection({ writing }: { writing: ParentWritingDetailResponse }) {
   return (
     <section className="grid gap-4 md:grid-cols-2">
       <article className="rounded-[10px] border border-black/10 bg-white p-5">
         <h2 className="mb-3 text-[14px] font-semibold text-black">수정 전 원문</h2>
         <div className="min-h-30 rounded-[8px] border border-black/10 bg-[#f3f4f6] p-4 text-[12px] leading-relaxed text-black">
-          {post.originalContent}
+          {writing.originalText}
         </div>
         <p className="mt-3 text-[10px] text-black/50">
           * 아동이 직접 작성한 원문 그대로 보존됩니다.
@@ -16,7 +16,7 @@ export function PostCompareSection({ post }: { post: ParentPostDetail }) {
       <article className="rounded-[10px] border border-black/10 bg-white p-5">
         <h2 className="mb-3 text-[14px] font-semibold text-black">최종 수정본</h2>
         <div className="min-h-30 rounded-[8px] border border-black/10 bg-[#f3f4f6] p-4 text-[12px] leading-relaxed text-black">
-          {post.revisedContent}
+          {writing.finalText ?? '아직 확정된 수정본이 없어요.'}
         </div>
         <p className="mt-3 text-[10px] text-black/50">* 아동이 자기교정을 완료한 최종본입니다.</p>
       </article>
