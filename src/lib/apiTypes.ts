@@ -48,6 +48,87 @@ export interface WritingCreateResponse {
 export interface WritingSubmitResponse {
   writingId: number
   status: WritingStatus
+  analysisInProgress?: boolean
+}
+
+export interface StrokePoint {
+  x: number
+  y: number
+  t: number
+  pressure: number | null
+}
+
+export interface StrokeData {
+  index: number
+  penDownAt: number
+  penUpAt: number
+  points: StrokePoint[]
+}
+
+export interface StrokeBatchAppendResponse {
+  writingId: number
+  batchSeq: number
+  strokeCount: number
+  totalBatches: number
+  duplicated: boolean
+}
+
+export interface HandwritingImageUploadResponse {
+  writingId: number
+  imageUrl: string
+}
+
+export interface OcrSegmentResponse {
+  seq: number
+  text: string
+  confidence: number
+  startIndex: number
+  endIndex: number
+  lowConfidence: boolean
+}
+
+export interface ProcessMetricResponse {
+  totalDurationMs: number
+  pauseCount: number
+  longestPauseMs: number
+  avgStrokeDurationMs: number
+  hesitationPoints: Array<{
+    charIndex: number
+    character: string
+    jamo: string
+    durationMs: number
+    retryCount: number
+  }>
+}
+
+export interface HandwritingSummaryResponse {
+  imageUrl: string
+  strokeDataUrl: string
+  strokeCount: number
+  totalDurationMs: number
+  canvasWidth: number
+  canvasHeight: number
+}
+
+export interface AnalysisResponse {
+  writingId: number
+  status: WritingAnalysisStatus
+  fullText: string | null
+  overallConfidence: number | null
+  provider: string | null
+  requestedAt: string | null
+  completedAt: string | null
+  failureReason: string | null
+  segments: OcrSegmentResponse[]
+  processMetric: ProcessMetricResponse | null
+  handwriting: HandwritingSummaryResponse | null
+}
+
+export interface WritingTextConfirmResponse {
+  writingId: number
+  status: WritingStatus
+  finalText: string
+  edited: boolean
 }
 
 export interface WritingDetailResponse {

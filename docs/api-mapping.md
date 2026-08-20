@@ -268,12 +268,12 @@ GET  /api/writings/{id}/errors                                  → 폴링
 `PATCH /api/writings/{id}`(임시 저장)는 쓰지 않는다. `WriteStart`가 본문을 다 받은 뒤 `Analyzing`으로 넘어가므로
 중간 저장 시점이 없다. `submit`이 `content`를 함께 보낸다. 작성 중 자동 저장이 요구사항이 되면 그때 별도로 다룬다.
 
-### 손글씨 플로우 (다음 이슈)
+### 손글씨 플로우
 
 ```
 POST  /api/writings                     {inputType: "PEN", topic}  → writingId, DRAFT
-POST  /api/writings/{id}/strokes        (배치, batchSeq 0부터)
-POST  /api/writings/{id}/handwriting-image  (multipart PNG)
+POST  /api/writings/{id}/strokes        {batchSeq, strokes[]}
+POST  /api/writings/{id}/handwriting-image  multipart file + canvasWidth/Height
 POST  /api/writings/{id}/submit         (content 없이)             → 202, SUBMITTED
 GET   /api/writings/{id}/analysis                                  → 폴링 → SUCCEEDED
 PATCH /api/writings/{id}/text           {content}                  → CONFIRMED
@@ -285,6 +285,68 @@ GET   /api/writings/{id}/errors                                    → 폴링
 클라이언트는 `batchSeq`를 다시 0부터 보낸다.
 
 `segments[].lowConfidence`가 true인 구절은 확신도 미달이라 **아동에게 오류로 확정해 보여주지 않는다.** 별도 안내로만 표시한다.
+
+#### 이미지와 획이 둘 다 필수다
+
+우회로가 없다. `HandwritingServiceImpl.finalizeForAnalysis`가 둘 다 검사하고 하나라도 없으면 던진다.
+
+```java
+handwritingAssetRepository.findByWritingId(writingId)
+        .orElseThrow(() -> new HandwritingException(IMAGE_REQUIRED));
+if (!asset.hasImage()) throw new HandwritingException(IMAGE_REQUIRED);
+if (batches.isEmpty()) throw new HandwritingException(STROKE_DATA_REQUIRED);
+```
+
+`submit` 자체는 통과하지만 비동기 분석이 실패해 `/analysis`가 `FAILED`로 떨어진다.
+`canvasWidth` / `canvasHeight`도 `HandwritingAsset`에서 읽는데 이 값은 이미지 업로드의 쿼리 파라미터로만 들어온다.
+**이미지 업로드가 캔버스 크기의 유일한 출처다.**
+
+#### 요청 스키마
+
+```
+POST /{id}/strokes
+{
+  batchSeq: number,          // 0부터. 재전송 시 같은 값 → duplicated: true
+  strokes: [{
+    index: number,           // 글 전체에서의 획 순번(0부터)
+    penDownAt: number,       // ms, 세션 시작 기준
+    penUpAt: number,
+    points: [{ x, y, t, pressure }]   // t 는 ms, pressure 는 미지원 기기면 null
+  }]
+}
+
+POST /{id}/handwriting-image
+multipart/form-data
+  file: Blob                 // 필드명은 "file" (@RequestPart("file"))
+  ?canvasWidth=&canvasHeight=
+```
+
+멀티파트 요청에는 `Content-Type`을 직접 지정하면 안 된다. 브라우저가 boundary를 붙이므로 손으로 넣으면 파싱이 깨진다.
+`src/lib/api.ts`의 `fetchJson`이 body가 있으면 JSON 기본값을 넣으므로 멀티파트는 분기해야 한다.
+
+#### 고정하는 결정
+
+**획은 제출 직전에 한 번에 보낸다.** 작성 중 주기 전송은 하지 않는다.
+주기 전송을 하려면 `PenWrite` 진입 시점에 `POST /writings`로 글을 미리 만들어야 하는데, 그러면 중도 이탈한 세션이
+`DRAFT` 글로 목록에 남는다. 완료를 누를 때 글을 만들고 획을 한 번에 보내면 그 문제가 없다.
+Swagger 설명은 주기 전송을 권하지만, 재전송이 `batchSeq`로 멱등하게 복구되므로 실패 복원력은 확보된다.
+
+**지우개로 획을 지우면 남은 획을 0부터 다시 번호 매긴다.** 서버가 받는 `index`가 연속적이다.
+제출 직전 1회 전송이라 가능한 선택이다. 나중에 주기 전송으로 바꾸면 이미 보낸 획의 번호를 바꿀 수 없으므로
+빈 자리를 남기는 방식으로 함께 바꿔야 한다.
+
+**PNG는 흰 배경으로 만든다.** 화면에 보이는 것과 같고 OCR 엔진이 기대하는 일반적인 형태다.
+투명 배경은 엔진이 투명 영역을 검정으로 처리하면 글자가 반전되어 인식이 망가질 수 있다.
+
+**`OcrConfirm`에 다시 쓰기를 넣는다.** 변환이 크게 어긋났을 때 손으로 다 고치는 것 말고 처음부터 다시 쓰는 길을 준다.
+`POST /rewrite`가 이미 지원하고 획 원본도 보존된다.
+
+#### 렌더링 형식과 전송 형식을 분리한다
+
+`perfect-freehand`의 `getStroke`는 `[x, y, pressure]` 형태를 받는다. 여기에 시간을 4번째 요소로 끼워 넣으면
+라이브러리 내부 동작에 의존하게 된다. 저장 구조는 시간을 포함한 형태로 두고, 렌더링 직전에 `[x, y, pressure]`만 뽑아 넘긴다.
+
+시간은 `performance.now()` 기준 상대값으로 잡고 캔버스 마운트 시점을 0으로 둔다.
 
 ### 폴링 규칙
 
@@ -312,4 +374,9 @@ React Query의 `refetchInterval`이 종결 상태에서 `false`를 반환하는 
 `src/lib/api.ts`의 목 변환 어댑터(`mapMockPost`, `mapMockDetail`, `mapMockError`, `mockWritingId`, `mockPostId`)를 삭제한다.
 핸들러가 실 형태로 응답하면 두 모드가 같은 코드 경로를 타므로 어댑터가 필요 없다.
 
-s3(`/api/parent/home` 등)와 PEN 목 핸들러(`/api/ocr`)는 건드리지 않는다. 목 모드에서 계속 동작해야 한다.
+s3(`/api/parent/home` 등) 목 핸들러는 건드리지 않는다. 목 모드에서 계속 동작해야 한다.
+
+`/api/ocr`은 키보드 작업(이슈 #14) 시점에는 보존했다. 그때는 펜 경로를 손대지 않아 목 모드의 펜 흐름이
+이 핸들러에 의존했기 때문이다. **손글씨를 실 API로 옮기는 이 작업에서는 삭제한다.**
+`PenWrite`가 더 이상 호출하지 않으므로 죽은 코드가 되고, 대신 `/strokes`·`/handwriting-image`·`/analysis`·
+`/text`·`/rewrite` 목 핸들러가 그 자리를 채운다.

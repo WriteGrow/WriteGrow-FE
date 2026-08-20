@@ -1,17 +1,34 @@
 import { DEV_CHILD_PROFILE_ID } from './devChild'
 import type {
   ApiErrorBody,
+  AnalysisResponse,
   ErrorResponse,
+  HandwritingImageUploadResponse,
   PageResponse,
+  StrokeBatchAppendResponse,
+  StrokeData,
   WritingCreateResponse,
   WritingDetailResponse,
   WritingErrorsResponse,
   WritingInputType,
   WritingSubmitResponse,
+  WritingTextConfirmResponse,
   WritingSummaryResponse,
 } from './apiTypes'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '')
+
+/**
+ * 분석 레코드가 아직 만들어지지 않았다는 뜻의 404.
+ *
+ * 제출은 트랜잭션 커밋 뒤 별도 스레드에서 분석을 시작한다(HandwritingSubmittedEvent,
+ * TextConfirmedEvent). 그 스레드가 markProcessing 으로 레코드를 만들기 전에 폴링이
+ * 들어가면 서버는 ANALYSIS_NOT_FOUND 404 를 준다. 실패가 아니라 "아직"이므로
+ * 폴링을 계속해야 한다.
+ */
+export function isAnalysisPending(error: unknown): boolean {
+  return error instanceof ApiRequestError && error.status === 404 && error.code === 'ANALYSIS_NOT_FOUND'
+}
 
 export class ApiRequestError extends Error {
   readonly code: string
@@ -58,7 +75,9 @@ async function readJson(response: Response): Promise<unknown> {
 async function fetchJson(path: string, init: RequestInit = {}): Promise<{ response: Response; body: unknown }> {
   const headers = new Headers(init.headers)
   headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
-  if (init.body !== undefined && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
 
   const response = await fetch(toApiUrl(path), { ...init, headers })
   const body = await readJson(response)
@@ -114,8 +133,56 @@ export async function submitWriting(
   writingId: number,
   input: { content?: string } = {},
 ): Promise<WritingSubmitResponse> {
+  const body = input.content === undefined ? undefined : JSON.stringify({ content: input.content })
   return request<WritingSubmitResponse>(`/api/writings/${writingId}/submit`, {
     method: 'POST',
+    ...(body === undefined ? {} : { body }),
+  })
+}
+
+export async function appendStrokes(
+  writingId: number,
+  input: { batchSeq: number; strokes: StrokeData[] },
+): Promise<StrokeBatchAppendResponse> {
+  return request<StrokeBatchAppendResponse>(`/api/writings/${writingId}/strokes`, {
+    method: 'POST',
     body: JSON.stringify(input),
+  })
+}
+
+export async function uploadHandwritingImage(
+  writingId: number,
+  blob: Blob,
+  dimensions: { canvasWidth: number; canvasHeight: number },
+): Promise<HandwritingImageUploadResponse> {
+  const formData = new FormData()
+  formData.append('file', blob, 'handwriting.png')
+  const query = new URLSearchParams({
+    canvasWidth: String(dimensions.canvasWidth),
+    canvasHeight: String(dimensions.canvasHeight),
+  })
+  return request<HandwritingImageUploadResponse>(`/api/writings/${writingId}/handwriting-image?${query}`, {
+    method: 'POST',
+    body: formData,
+  })
+}
+
+export async function getAnalysis(writingId: number): Promise<AnalysisResponse> {
+  return request<AnalysisResponse>(`/api/writings/${writingId}/analysis`)
+}
+
+export async function confirmText(
+  writingId: number,
+  input: { content: string },
+): Promise<WritingTextConfirmResponse> {
+  return request<WritingTextConfirmResponse>(`/api/writings/${writingId}/text`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function rewriteWriting(writingId: number): Promise<WritingCreateResponse> {
+  return request<WritingCreateResponse>(`/api/writings/${writingId}/rewrite`, {
+    method: 'POST',
   })
 }

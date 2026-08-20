@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TOPICS } from '../../lib/topics'
+import { FREE_TOPIC, TOPICS } from '../../lib/topics'
+
+const TOPIC_OPTIONS = [FREE_TOPIC, ...TOPICS]
 import { useWritingStore } from '../../stores/writingStore'
 
 export function WriteStart() {
@@ -37,7 +39,7 @@ export function WriteStart() {
       <h1 className="text-[16px] font-semibold text-black">무엇에 대해 써볼까?</h1>
 
       <div className="flex flex-wrap gap-2">
-        {TOPICS.map((topic) => (
+        {TOPIC_OPTIONS.map((topic) => (
           <button
             key={topic}
             type="button"

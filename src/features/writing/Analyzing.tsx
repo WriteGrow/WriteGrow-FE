@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { createWriting, getWritingErrors, submitWriting } from '../../lib/api'
+import { createWriting, getWritingErrors, isAnalysisPending, submitWriting } from '../../lib/api'
 import type { WritingErrorsResponse } from '../../lib/apiTypes'
 import { useWritingStore } from '../../stores/writingStore'
 
@@ -15,10 +15,11 @@ export function Analyzing() {
   const topic = useWritingStore((s) => s.topic)
   const mode = useWritingStore((s) => s.mode)
   const content = useWritingStore((s) => s.content)
+  const writingId = useWritingStore((s) => s.writingId)
   const setWritingId = useWritingStore((s) => s.setWritingId)
   const setErrors = useWritingStore((s) => s.setErrors)
   const reset = useWritingStore((s) => s.reset)
-  const [submittedWritingId, setSubmittedWritingId] = useState<number | null>(null)
+  const [keyboardWritingId, setKeyboardWritingId] = useState<number | null>(null)
   const [pollDeadline, setPollDeadline] = useState<number | null>(null)
   const [timedOut, setTimedOut] = useState(false)
 
@@ -30,7 +31,7 @@ export function Analyzing() {
       })
       setWritingId(created.writingId)
       await submitWriting(created.writingId, mode === 'keyboard' ? { content } : {})
-      setSubmittedWritingId(created.writingId)
+      setKeyboardWritingId(created.writingId)
       setPollDeadline(Date.now() + MAX_ERROR_POLL_MS)
       return created.writingId
     },
@@ -39,12 +40,24 @@ export function Analyzing() {
   const startedRef = useRef(false)
 
   useEffect(() => {
-    if (startedRef.current || !topic || !mode || !content) return
+    if (startedRef.current || !topic || !mode) return
     startedRef.current = true
+    if (mode === 'pen') {
+      return
+    }
+    if (!content) return
     createAndSubmit.mutate()
     // The mutation must start once when this route is entered, including under StrictMode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const submittedWritingId = mode === 'pen' ? writingId : keyboardWritingId
+
+  useEffect(() => {
+    if (mode !== 'pen' || writingId === null || !content) return
+    const timeoutId = setTimeout(() => setTimedOut(true), MAX_ERROR_POLL_MS)
+    return () => clearTimeout(timeoutId)
+  }, [mode, writingId, content])
 
   const errorsQuery = useQuery<WritingErrorsResponse>({
     queryKey: ['writings', submittedWritingId, 'errors', 'submit-flow'],
@@ -79,7 +92,13 @@ export function Analyzing() {
   // 세 가지를 모두 실패로 다뤄야 한다. 분석이 실패한 것(status FAILED), 시간이 초과된 것,
   // 그리고 요청 자체가 실패한 것(errorsQuery.isError). 마지막을 빠뜨리면 서버 장애 때
   // 아이가 빠져나갈 수 없는 스피너를 보게 된다.
-  const analysisFailed = errorsQuery.data?.status === 'FAILED' || timedOut || errorsQuery.isError
+  // 성공한 분석은 어떤 경우에도 실패로 뒤집지 않는다. 성공하면 바로 다음 화면으로
+  // 넘어가지만, 이동 직전 렌더나 느린 기기에서 실패 화면이 깜빡일 수 있다.
+  const errorsStatus = errorsQuery.data?.status
+  // 분석 레코드가 아직 없어서 나는 404 는 실패가 아니라 "아직"이다. 폴링을 계속한다.
+  const errorsRequestFailed = errorsQuery.isError && !isAnalysisPending(errorsQuery.error)
+  const analysisFailed =
+    errorsStatus !== 'SUCCEEDED' && (errorsStatus === 'FAILED' || timedOut || errorsRequestFailed)
   const requestFailed = createAndSubmit.isError
 
   function retryAnalysis() {
@@ -98,7 +117,7 @@ export function Analyzing() {
     navigate('/child')
   }
 
-  if (!topic || !mode || !content) {
+  if (!topic || !mode || (mode === 'keyboard' && !content) || (mode === 'pen' && (writingId === null || !content))) {
     return <Navigate to="/child/write" replace />
   }
 
@@ -136,7 +155,9 @@ export function Analyzing() {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
       <div className="size-12 animate-spin rounded-full border-4 border-black/10 border-t-black" />
-      <p className="text-[14px] text-black">글을 저장하고 오류를 분석하고 있어요...</p>
+      <p className="text-[14px] text-black">
+        {mode === 'pen' ? '글의 오류를 분석하고 있어요...' : '글을 저장하고 오류를 분석하고 있어요...'}
+      </p>
     </div>
   )
 }

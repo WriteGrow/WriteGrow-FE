@@ -1,7 +1,9 @@
 import { http, HttpResponse } from 'msw'
 import type {
+  AnalysisResponse,
   ErrorCandidateResponse,
   PageResponse,
+  StrokeData,
   WritingAnalysisStatus,
   WritingCreateResponse,
   WritingDetailResponse,
@@ -52,6 +54,14 @@ interface MockWriting {
   errorsStatus: WritingAnalysisStatus
   errorsPollCount: number
   failureReason: string | null
+  strokes: StrokeData[]
+  receivedBatchSeqs: Set<number>
+  imageUploaded: boolean
+  canvasWidth: number | null
+  canvasHeight: number | null
+  analysisStatus: WritingAnalysisStatus
+  analysisPollCount: number
+  analysisFullText: string | null
 }
 
 const mockWritings = new Map<number, MockWriting>()
@@ -108,6 +118,14 @@ function ensureMockWriting(post: (typeof posts)[number]): MockWriting {
     errorsStatus: 'SUCCEEDED',
     errorsPollCount: 0,
     failureReason: null,
+    strokes: [],
+    receivedBatchSeqs: new Set(),
+    imageUploaded: false,
+    canvasWidth: null,
+    canvasHeight: null,
+    analysisStatus: post.mode === 'pen' ? 'PENDING' : 'SUCCEEDED',
+    analysisPollCount: 0,
+    analysisFullText: post.mode === 'pen' ? null : post.content,
   }
   mockWritings.set(writingId, writing)
   return writing
@@ -149,10 +167,74 @@ function toErrors(writing: MockWriting): WritingErrorsResponse {
   return {
     writingId: writing.writingId,
     status: writing.errorsStatus,
-    analyzedText: writing.finalText ?? writing.originalText,
+    analyzedText: writing.finalText ?? writing.analysisFullText ?? writing.originalText,
     errors: writing.errors,
     analyzedAt: writing.errorsStatus === 'SUCCEEDED' ? writing.submittedAt : null,
     failureReason: writing.failureReason,
+  }
+}
+
+function toAnalysis(writing: MockWriting): AnalysisResponse {
+  const fullText = writing.analysisFullText
+  const midpoint = fullText ? Math.max(1, Math.floor(fullText.length / 2)) : 0
+  const segments = fullText
+    ? [
+        {
+          seq: 0,
+          text: fullText.slice(0, midpoint),
+          confidence: 0.94,
+          startIndex: 0,
+          endIndex: midpoint,
+          lowConfidence: false,
+        },
+        {
+          seq: 1,
+          text: fullText.slice(midpoint),
+          confidence: 0.58,
+          startIndex: midpoint,
+          endIndex: fullText.length,
+          lowConfidence: true,
+        },
+      ]
+    : []
+
+  return {
+    writingId: writing.writingId,
+    status: writing.analysisStatus,
+    fullText,
+    overallConfidence: fullText ? 0.82 : null,
+    provider: 'stub',
+    requestedAt: writing.submittedAt,
+    completedAt: writing.analysisStatus === 'SUCCEEDED' ? writing.submittedAt : null,
+    failureReason: writing.analysisStatus === 'FAILED' ? writing.failureReason : null,
+    segments,
+    processMetric:
+      writing.analysisStatus === 'SUCCEEDED'
+        ? {
+            totalDurationMs: writing.strokes.at(-1)?.penUpAt ?? 0,
+            pauseCount: 0,
+            longestPauseMs: 0,
+            avgStrokeDurationMs:
+              writing.strokes.length > 0
+                ? Math.round(
+                    writing.strokes.reduce((total, stroke) => total + stroke.penUpAt - stroke.penDownAt, 0) /
+                      writing.strokes.length,
+                  )
+                : 0,
+            hesitationPoints: [],
+          }
+        : null,
+    handwriting:
+      writing.imageUploaded
+        ? {
+            imageUrl: `/mock/writings/${writing.writingId}/handwriting.png`,
+            strokeDataUrl: `/mock/writings/${writing.writingId}/strokes.json`,
+            strokeCount: writing.strokes.length,
+            totalDurationMs: writing.strokes.at(-1)?.penUpAt ?? 0,
+            canvasWidth: writing.canvasWidth ?? 0,
+            canvasHeight: writing.canvasHeight ?? 0,
+          }
+        : null,
   }
 }
 
@@ -202,13 +284,67 @@ export const handlers = [
     writing.errorsStatus = 'PENDING'
     writing.errorsPollCount = 0
     writing.failureReason = null
+    writing.strokes = []
+    writing.receivedBatchSeqs.clear()
+    writing.imageUploaded = false
+    writing.canvasWidth = null
+    writing.canvasHeight = null
+    writing.analysisStatus = inputType === 'PEN' ? 'PENDING' : 'SUCCEEDED'
+    writing.analysisPollCount = 0
+    writing.analysisFullText = null
 
     const data: WritingCreateResponse = {
       writingId: writing.writingId,
       inputType: writing.inputType,
       status: writing.status,
     }
-    return success(data)
+    return HttpResponse.json({ success: true, data }, { status: 201 })
+  }),
+
+  http.post('/api/writings/:writingId/strokes', async ({ params, request }) => {
+    const writing = findMockWriting(Number(params.writingId))
+    if (!writing) return failure(404, 'NOT_FOUND', '글을 찾을 수 없습니다.')
+    if (writing.inputType !== 'PEN') return failure(400, 'NOT_HANDWRITING', '손글씨 글에만 사용할 수 있어요.')
+
+    let body: { batchSeq?: unknown; strokes?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const batchSeq = typeof body.batchSeq === 'number' ? body.batchSeq : 0
+    const strokes = Array.isArray(body.strokes) ? (body.strokes as StrokeData[]) : []
+    if (strokes.length === 0) return failure(400, 'STROKE_DATA_REQUIRED', '획 데이터가 필요합니다.')
+
+    const duplicated = writing.receivedBatchSeqs.has(batchSeq)
+    if (!duplicated) {
+      writing.receivedBatchSeqs.add(batchSeq)
+      writing.strokes.push(...strokes)
+    }
+    return success({
+      writingId: writing.writingId,
+      batchSeq,
+      strokeCount: strokes.length,
+      totalBatches: writing.receivedBatchSeqs.size,
+      duplicated,
+    })
+  }),
+
+  http.post('/api/writings/:writingId/handwriting-image', async ({ params, request }) => {
+    const writing = findMockWriting(Number(params.writingId))
+    if (!writing) return failure(404, 'NOT_FOUND', '글을 찾을 수 없습니다.')
+    if (writing.inputType !== 'PEN') return failure(400, 'NOT_HANDWRITING', '손글씨 글에만 사용할 수 있어요.')
+
+    const formData = await request.formData()
+    if (!formData.get('file')) return failure(400, 'IMAGE_REQUIRED', '손글씨 이미지가 필요합니다.')
+    const url = new URL(request.url)
+    writing.imageUploaded = true
+    writing.canvasWidth = Number(url.searchParams.get('canvasWidth') ?? 0) || null
+    writing.canvasHeight = Number(url.searchParams.get('canvasHeight') ?? 0) || null
+    return success({
+      writingId: writing.writingId,
+      imageUrl: `/mock/writings/${writing.writingId}/handwriting.png`,
+    })
   }),
 
   http.post('/api/writings/:writingId/submit', async ({ params, request }) => {
@@ -225,6 +361,9 @@ export const handlers = [
     if (writing.inputType === 'KEYBOARD' && !content) {
       return failure(400, 'EMPTY_CONTENT', '빈 글은 제출할 수 없습니다.')
     }
+    if (writing.inputType === 'PEN' && (writing.strokes.length === 0 || !writing.imageUploaded)) {
+      return failure(400, 'HANDWRITING_DATA_REQUIRED', '손글씨 획과 이미지가 필요합니다.')
+    }
 
     const post = findPostById(writing.postId)
     if (post && content) analyzePost(post.id, content)
@@ -236,9 +375,89 @@ export const handlers = [
     writing.errorsStatus = 'PENDING'
     writing.errorsPollCount = 0
     writing.failureReason = null
+    if (writing.inputType === 'PEN') {
+      writing.analysisStatus = 'PENDING'
+      writing.analysisPollCount = 0
+      writing.analysisFullText = null
+    }
 
     const data: WritingSubmitResponse = { writingId: writing.writingId, status: writing.status }
     return HttpResponse.json({ success: true, data }, { status: writing.inputType === 'PEN' ? 202 : 200 })
+  }),
+
+  http.get('/api/writings/:writingId/analysis', ({ params }) => {
+    const writing = findMockWriting(Number(params.writingId))
+    if (!writing) return failure(404, 'NOT_FOUND', '글을 찾을 수 없습니다.')
+    if (writing.inputType !== 'PEN') return failure(400, 'NOT_HANDWRITING', '손글씨 글에만 사용할 수 있어요.')
+
+    if (writing.analysisStatus === 'PENDING' || writing.analysisStatus === 'PROCESSING') {
+      writing.analysisPollCount += 1
+      if (writing.analysisPollCount >= 2) {
+        writing.analysisStatus = 'SUCCEEDED'
+        writing.analysisFullText = getOcrSample(writing.strokes.length)
+        writing.status = 'ANALYZED'
+      } else {
+        writing.analysisStatus = 'PROCESSING'
+      }
+    }
+    return success(toAnalysis(writing))
+  }),
+
+  http.patch('/api/writings/:writingId/text', async ({ params, request }) => {
+    const writing = findMockWriting(Number(params.writingId))
+    if (!writing) return failure(404, 'NOT_FOUND', '글을 찾을 수 없습니다.')
+    if (writing.inputType !== 'PEN') return failure(400, 'NOT_HANDWRITING', '손글씨 글에만 사용할 수 있어요.')
+    let body: { content?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const content = typeof body.content === 'string' ? body.content.trim() : ''
+    if (!content) return failure(400, 'EMPTY_CONTENT', '빈 글은 확정할 수 없습니다.')
+    if (writing.analysisStatus !== 'SUCCEEDED') {
+      return failure(409, 'ANALYSIS_NOT_COMPLETE', '손글씨 변환이 아직 끝나지 않았습니다.')
+    }
+
+    const post = findPostById(writing.postId)
+    if (post) analyzePost(post.id, content)
+    writing.originalText = writing.analysisFullText ?? content
+    writing.finalText = content
+    writing.status = 'CONFIRMED'
+    writing.errors = post ? toErrorCandidates(post.id, content) : []
+    writing.errorsStatus = 'PENDING'
+    writing.errorsPollCount = 0
+    return success({
+      writingId: writing.writingId,
+      status: writing.status,
+      finalText: content,
+      edited: content !== writing.analysisFullText,
+    })
+  }),
+
+  http.post('/api/writings/:writingId/rewrite', ({ params }) => {
+    const writing = findMockWriting(Number(params.writingId))
+    if (!writing) return failure(404, 'NOT_FOUND', '글을 찾을 수 없습니다.')
+    if (writing.inputType !== 'PEN') return failure(400, 'NOT_HANDWRITING', '손글씨 글에만 사용할 수 있어요.')
+    if (writing.analysisStatus !== 'SUCCEEDED') {
+      return failure(409, 'ANALYSIS_NOT_COMPLETE', '손글씨 변환이 아직 끝나지 않았습니다.')
+    }
+
+    writing.status = 'DRAFT'
+    writing.originalText = ''
+    writing.finalText = null
+    writing.errors = []
+    writing.errorsStatus = 'PENDING'
+    writing.errorsPollCount = 0
+    writing.analysisStatus = 'PENDING'
+    writing.analysisPollCount = 0
+    writing.analysisFullText = null
+    writing.receivedBatchSeqs.clear()
+    return success({
+      writingId: writing.writingId,
+      inputType: writing.inputType,
+      status: writing.status,
+    })
   }),
 
   http.get('/api/writings/:writingId/errors', ({ params }) => {
@@ -286,11 +505,6 @@ export const handlers = [
     const post = findPostById(String(params.postId))
     if (!post) return new HttpResponse(null, { status: 404 })
     return HttpResponse.json(post)
-  }),
-
-  http.post('/api/ocr', async ({ request }) => {
-    const { strokeCount } = (await request.json()) as { strokeCount: number }
-    return HttpResponse.json({ text: getOcrSample(strokeCount) })
   }),
 
   http.post('/api/posts/:postId/analyze', async ({ params, request }) => {
