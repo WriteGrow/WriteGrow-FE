@@ -13,7 +13,10 @@ import type {
   WritingSubmitResponse,
   WritingSummaryResponse,
 } from '../lib/apiTypes'
-import { DEV_CHILD_ID, DEV_CHILD_PROFILE_ID } from '../lib/devChild'
+import { DEV_CHILD_ID } from '../lib/devChild'
+
+// 목(MSW) 전용. 예전 DEV_CHILD_PROFILE_ID 상수가 쓰던 값을 그대로 리터럴로 유지한다.
+const MOCK_CHILD_PROFILE_ID = 1
 import {
   analyzePost,
   children,
@@ -66,6 +69,8 @@ interface MockWriting {
 
 const mockWritings = new Map<number, MockWriting>()
 let nextMockWritingId = 1
+let nextMockAccountId = 1
+let nextMockProfileId = 1
 
 function inputTypeFor(mode: 'pen' | 'keyboard'): WritingInputType {
   return mode === 'pen' ? 'PEN' : 'KEYBOARD'
@@ -152,7 +157,7 @@ function toSummary(writing: MockWriting): WritingSummaryResponse {
 function toDetail(writing: MockWriting): WritingDetailResponse {
   return {
     writingId: writing.writingId,
-    profileId: DEV_CHILD_PROFILE_ID,
+    profileId: MOCK_CHILD_PROFILE_ID,
     inputType: writing.inputType,
     status: writing.status,
     topic: writing.topic,
@@ -481,8 +486,68 @@ export const handlers = [
     return HttpResponse.json(children)
   }),
 
-  http.get('/api/parent/home', () => {
-    return HttpResponse.json(parentHomeSummaries)
+  http.post('/api/accounts', async ({ request }) => {
+    let body: { name?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const name = typeof body.name === 'string' ? body.name : ''
+    const accountId = nextMockAccountId++
+    return HttpResponse.json(
+      { success: true, data: { id: accountId, name, createdAt: new Date().toISOString() } },
+      { status: 201 },
+    )
+  }),
+
+  http.post('/api/accounts/:accountId/profiles', async ({ params, request }) => {
+    let body: { role?: unknown; nickname?: unknown; birthYear?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const role = body.role === 'PARENTS' || body.role === 'CHILD' ? body.role : 'CHILD'
+    const nickname = typeof body.nickname === 'string' ? body.nickname : ''
+    const birthYear = typeof body.birthYear === 'number' ? body.birthYear : new Date().getFullYear()
+    const profileId = nextMockProfileId++
+    return HttpResponse.json(
+      {
+        success: true,
+        data: {
+          id: profileId,
+          accountId: Number(params.accountId),
+          role,
+          nickname,
+          birthYear,
+          consentConfirmed: false,
+        },
+      },
+      { status: 201 },
+    )
+  }),
+
+  // 신규 복수형 엔드포인트. 목 모드에서 온보딩 뒤 보호자 홈이 계속 동작하도록
+  // parentHomeSummaries(기존 s3 픽스처)를 ChildCard 형태로만 옮겨 담는다.
+  http.get('/api/parents/home', () => {
+    const data = {
+      accountId: 1,
+      children: parentHomeSummaries.map((child, index) => ({
+        profileId: index + 1,
+        nickname: child.name,
+        age: Number(child.ageLabel.replace(/\D/g, '')) || 0,
+        weeklyWritingCount: child.postsThisWeek,
+        selfCorrectionCount: child.selfCorrections,
+        writingStreakDays: child.streakDays,
+        recentWritingId: null,
+        recentWritingPreview: child.recentTitle,
+        topErrorTypes: child.repeatedErrorTypes,
+        weeklyErrorCount: child.errorsThisWeek,
+        errorCountDelta: child.errorDeltaVsLastWeek,
+      })),
+    }
+    return success(data)
   }),
 
   http.get('/api/children/:childId/posts', ({ params }) => {

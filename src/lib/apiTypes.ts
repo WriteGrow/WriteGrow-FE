@@ -172,3 +172,49 @@ export interface WritingErrorsResponse {
   analyzedAt: string | null
   failureReason: string | null
 }
+
+export interface AccountResponse {
+  id: number
+  name: string
+  createdAt: string
+}
+
+export interface AccountCreateRequest {
+  name: string
+}
+
+export type ProfileRole = 'PARENTS' | 'CHILD'
+
+export interface ProfileResponse {
+  id: number
+  accountId: number
+  role: ProfileRole
+  nickname: string
+  birthYear: number
+  consentConfirmed: boolean
+}
+
+export interface ProfileCreateRequest {
+  role: ProfileRole
+  nickname: string
+  birthYear: number
+}
+
+export interface ChildCard {
+  profileId: number
+  nickname: string
+  age: number
+  weeklyWritingCount: number
+  selfCorrectionCount: number
+  writingStreakDays: number
+  recentWritingId: number | null
+  recentWritingPreview: string | null
+  topErrorTypes: string[]
+  weeklyErrorCount: number
+  errorCountDelta: number
+}
+
+export interface ParentHomeResponse {
+  accountId: number
+  children: ChildCard[]
+}

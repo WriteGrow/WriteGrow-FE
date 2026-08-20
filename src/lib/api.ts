@@ -1,10 +1,15 @@
-import { DEV_CHILD_PROFILE_ID } from './devChild'
+import { getActiveChildProfileId } from '../stores/accountStore'
 import type {
+  AccountCreateRequest,
+  AccountResponse,
   ApiErrorBody,
   AnalysisResponse,
   ErrorResponse,
   HandwritingImageUploadResponse,
   PageResponse,
+  ParentHomeResponse,
+  ProfileCreateRequest,
+  ProfileResponse,
   StrokeBatchAppendResponse,
   StrokeData,
   WritingCreateResponse,
@@ -72,9 +77,16 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-async function fetchJson(path: string, init: RequestInit = {}): Promise<{ response: Response; body: unknown }> {
+async function fetchJson(
+  path: string,
+  init: RequestInit = {},
+  profileId?: number,
+): Promise<{ response: Response; body: unknown }> {
   const headers = new Headers(init.headers)
-  headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
+  const resolvedProfileId = profileId ?? getActiveChildProfileId()
+  if (resolvedProfileId !== undefined) {
+    headers.set('X-Profile-Id', String(resolvedProfileId))
+  }
   if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
@@ -96,8 +108,8 @@ async function fetchJson(path: string, init: RequestInit = {}): Promise<{ respon
   return { response, body }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const { response, body } = await fetchJson(path, init)
+async function request<T>(path: string, init: RequestInit = {}, profileId?: number): Promise<T> {
+  const { response, body } = await fetchJson(path, init, profileId)
   if (isErrorResponse(body)) throw new ApiRequestError(body.error, response.status)
   if (!isApiResponse<T>(body)) {
     throw new ApiRequestError(
@@ -185,4 +197,19 @@ export async function rewriteWriting(writingId: number): Promise<WritingCreateRe
   return request<WritingCreateResponse>(`/api/writings/${writingId}/rewrite`, {
     method: 'POST',
   })
+}
+
+export async function createAccount(input: AccountCreateRequest): Promise<AccountResponse> {
+  return request<AccountResponse>('/api/accounts', { method: 'POST', body: JSON.stringify(input) })
+}
+
+export async function createProfile(accountId: number, input: ProfileCreateRequest): Promise<ProfileResponse> {
+  return request<ProfileResponse>(`/api/accounts/${accountId}/profiles`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function getParentHome(parentProfileId: number): Promise<ParentHomeResponse> {
+  return request<ParentHomeResponse>('/api/parents/home', {}, parentProfileId)
 }

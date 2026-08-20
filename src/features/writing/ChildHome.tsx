@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { getWritingErrors, getWritings } from '../../lib/api'
 import type { WritingStatus } from '../../lib/apiTypes'
-import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
+import { useAccountStore } from '../../stores/accountStore'
 import { useWritingStore } from '../../stores/writingStore'
 import { TOPICS } from '../../lib/topics'
 
@@ -18,9 +18,11 @@ const STATUS_LABELS: Record<WritingStatus, string> = {
 export function ChildHome() {
   const navigate = useNavigate()
   const resetWriting = useWritingStore((s) => s.reset)
+  const activeChildProfileId = useAccountStore((s) => s.activeChildProfileId)
   const { data: writings, isLoading } = useQuery({
-    queryKey: ['writings', DEV_CHILD_PROFILE_ID, 0, 5],
+    queryKey: ['writings', activeChildProfileId, 0, 5],
     queryFn: () => getWritings({ page: 0, size: 5 }),
+    enabled: activeChildProfileId !== null,
   })
   const posts = writings?.content
 

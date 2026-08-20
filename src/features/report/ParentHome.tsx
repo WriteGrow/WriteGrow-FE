@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
-import type { ParentChildSummary } from '../../mocks/seed'
+import { getParentHome } from '../../lib/api'
+import { useAccountStore } from '../../stores/accountStore'
 import { ActivityCard } from './parent-home/ActivityCard'
 import { ErrorStats } from './parent-home/ErrorStats'
 import { FocusGuidance } from './parent-home/FocusGuidance'
 
 export function ParentHome() {
+  const parentProfileId = useAccountStore((s) => s.parentProfileId)
   const {
-    data: summaries,
+    data,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['parent', 'home'],
-    queryFn: async (): Promise<ParentChildSummary[]> => {
-      const res = await fetch('/api/parent/home')
-      if (!res.ok) throw new Error('failed to load parent home')
-      return res.json()
-    },
+    queryKey: ['parents', 'home', parentProfileId],
+    queryFn: () => getParentHome(parentProfileId as number),
+    enabled: parentProfileId !== null,
   })
+  const summaries = data?.children
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -34,7 +34,7 @@ export function ParentHome() {
         {summaries && (
           <div className="grid gap-4 md:grid-cols-2">
             {summaries.map((child) => (
-              <ActivityCard key={child.childId} child={child} />
+              <ActivityCard key={child.profileId} child={child} />
             ))}
           </div>
         )}
@@ -48,7 +48,7 @@ export function ParentHome() {
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {summaries.map((child) => (
-                <ErrorStats key={child.childId} child={child} />
+                <ErrorStats key={child.profileId} child={child} />
               ))}
             </div>
           </section>
@@ -57,7 +57,7 @@ export function ParentHome() {
             <h2 className="mb-4 text-[16px] font-semibold text-black">지도 우선순위 안내</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {summaries.map((child) => (
-                <FocusGuidance key={child.childId} child={child} />
+                <FocusGuidance key={child.profileId} child={child} />
               ))}
             </div>
           </section>
