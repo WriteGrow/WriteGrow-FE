@@ -71,7 +71,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+        <header className="relative z-20 flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
           <label className="relative w-full max-w-xs">
             <span className="sr-only">검색</span>
             <FiSearch

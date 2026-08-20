@@ -22,28 +22,28 @@ export function ProfileInfo() {
         프로필 보기
       </button>
       {open && (
-        <div className="absolute top-full right-0 z-10 mt-2 w-56 rounded-[10px] border border-black/10 bg-white p-4 text-[12px] shadow-sm">
-          <p className="mb-2 font-semibold text-black">내 계정 정보</p>
-          <dl className="space-y-1.5">
-            <div className="flex justify-between gap-3">
+        <article className="absolute top-full right-0 z-30 mt-2 w-64 rounded-[10px] border border-black/10 bg-white p-5 shadow-sm">
+          <h3 className="mb-3 text-[16px] font-semibold text-black">내 계정 정보</h3>
+          <dl className="space-y-2.5 text-[12px]">
+            <div className="flex justify-between gap-4">
               <dt className="text-black/50">계정 ID</dt>
               <dd className="font-medium text-black">{accountId ?? '-'}</dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-between gap-4">
               <dt className="text-black/50">보호자 프로필 ID</dt>
               <dd className="font-medium text-black">{parentProfileId ?? '-'}</dd>
             </div>
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-between gap-4">
               <dt className="text-black/50">아이 프로필 ID</dt>
               <dd className="font-medium text-black">
                 {childProfileIds.length > 0 ? childProfileIds.join(', ') : '-'}
               </dd>
             </div>
           </dl>
-          <p className="mt-3 text-black/40">
+          <p className="mt-3 border-t border-black/10 pt-3 text-[12px] text-black/50">
             다른 기기에서 온보딩 화면의 "이미 계정이 있으신가요?"에 계정 ID를 입력하면 이 계정을 다시 불러올 수 있어요.
           </p>
-        </div>
+        </article>
       )}
     </div>
   )
