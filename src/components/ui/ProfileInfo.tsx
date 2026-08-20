@@ -22,7 +22,7 @@ export function ProfileInfo() {
         프로필 보기
       </button>
       {open && (
-        <article className="absolute top-full right-0 z-30 mt-2 w-64 rounded-[10px] border border-black/10 bg-white p-5 shadow-sm">
+        <article className="profile-info-panel absolute top-full right-0 z-30 mt-2 w-64 rounded-[10px] border border-black/10 bg-white p-5 shadow-sm">
           <h3 className="mb-3 text-[16px] font-semibold text-black">내 계정 정보</h3>
           <dl className="space-y-2.5 text-[12px]">
             <div className="flex justify-between gap-4">
