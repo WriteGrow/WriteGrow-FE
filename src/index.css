@@ -151,7 +151,7 @@ body {
 }
 .onboarding-theme .onboarding-brand { position: relative; }
 .onboarding-theme .onboarding-brand > span { position: absolute; top: -8px; left: 78px; color: #63cf8b; font-size: 10px; }
-.onboarding-theme .onboarding-brand > p:first-of-type { color: #17365d; font-size: 25px; line-height: 1.2; font-weight: 700; }
+.onboarding-theme .onboarding-brand > p:first-of-type { color: #17365d; font-size: 25px; line-height: 1.2; font-weight: 900; }
 .onboarding-theme .onboarding-brand > p:last-of-type { margin-top: 2px; color: #6d7f96; font-size: 14px; font-weight: 700; }
 .onboarding-theme .onboarding-step {
   display: inline-flex;
@@ -246,7 +246,7 @@ body {
 .child-theme .brand-lockup > p:first-of-type {
   font-size: 25px !important;
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 900;
 }
 .child-theme .app-main {
   background-color: #fffaf0;
