@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { Bus, Gamepad2, GraduationCap, MapPinned, PawPrint, Sparkles, UsersRound } from 'lucide-react'
 import { getWritingErrors, getWritings } from '../../lib/api'
 import type { WritingStatus } from '../../lib/apiTypes'
 import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
@@ -14,6 +15,14 @@ const STATUS_LABELS: Record<WritingStatus, string> = {
   CONFIRMED: '수정 완료',
   ANALYSIS_FAILED: '분석 실패',
 }
+
+const TOPIC_CARDS = [
+  { topic: TOPICS[0], label: '학교', Icon: GraduationCap, color: 'sky' },
+  { topic: TOPICS[1], label: '가족', Icon: UsersRound, color: 'violet' },
+  { topic: TOPICS[2], label: '동물', Icon: PawPrint, color: 'mint' },
+  { topic: TOPICS[3], label: '여행', Icon: MapPinned, color: 'coral' },
+  { topic: TOPICS[4], label: '놀이', Icon: Gamepad2, color: 'yellow' },
+] as const
 
 export function ChildHome() {
   const navigate = useNavigate()
@@ -41,8 +50,15 @@ export function ChildHome() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-[16px] font-semibold text-black">안녕, 오늘도 글을 써볼까?</h1>
+    <div className="child-home space-y-6">
+      <section className="welcome-hero">
+        <div className="welcome-copy">
+          <span className="welcome-kicker">오늘도 반가워!</span>
+          <h1>상상 톡톡, 글쓰기 시작!</h1>
+          <p>네 이야기를 들려줘. 틀려도 괜찮아!</p>
+        </div>
+        <img src="/writegrow-buddies-flat.png" alt="연필과 책을 든 WriteGrow 글쓰기 친구들" />
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
@@ -61,15 +77,20 @@ export function ChildHome() {
           <section className="rounded-[10px] border border-black/10 bg-white p-5">
             <h2 className="mb-1 text-[16px] font-semibold text-black">오늘의 추천 주제</h2>
             <p className="mb-3 text-[12px] text-black/50">자유 선택</p>
-            <div className="flex flex-wrap gap-2">
-              {TOPICS.map((topic) => (
+            <div className="topic-card-grid">
+              {TOPIC_CARDS.map(({ topic, label, Icon, color }, index) => (
                 <button
                   key={topic}
                   type="button"
                   onClick={startWriting}
-                  className="rounded-[5px] border border-black/15 px-4 py-2.5 text-[12px] text-black/70 hover:bg-black/5"
+                  className={`topic-card topic-card--${color}`}
                 >
-                  {topic}
+                  <span className="topic-card-label">{label}</span>
+                  <span className="topic-card-check" aria-hidden>✓</span>
+                  <Icon className="topic-card-icon" aria-hidden />
+                  <span className="topic-card-title">{topic}</span>
+                  {index === 0 && <Bus className="topic-card-doodle" aria-hidden />}
+                  {index === 4 && <Sparkles className="topic-card-doodle" aria-hidden />}
                 </button>
               ))}
             </div>
@@ -113,7 +134,7 @@ export function ChildHome() {
             </div>
             <p className="mb-3 text-[12px] text-black/50">지난 글을 다시 읽어보고 싶으면 눌러 보세요.</p>
             {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
-            <ul className="space-y-2">
+            <ul className="previous-post-list space-y-2">
               {posts?.map((post) => (
                 <li key={post.writingId}>
                   <button

@@ -25,7 +25,7 @@ export function PostList() {
     <div className="space-y-4">
       <h1 className="text-[16px] font-semibold text-black">이전 글</h1>
       {isLoading && <p className="text-[12px] text-black/50">불러오는 중...</p>}
-      <ul className="space-y-2">
+      <ul className="child-post-list space-y-2">
         {posts?.map((post) => (
           <li key={post.writingId}>
             <button

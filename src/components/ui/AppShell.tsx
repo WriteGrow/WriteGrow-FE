@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { FiSearch } from 'react-icons/fi'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useRoleStore } from '../../stores/roleStore'
 import { RoleSwitcher } from './RoleSwitcher'
 
@@ -14,6 +14,8 @@ const navItems = [
 export function AppShell({ children }: { children: ReactNode }) {
   const setRole = useRoleStore((s) => s.setRole)
   const navigate = useNavigate()
+  const location = useLocation()
+  const isChildPage = location.pathname.startsWith('/child')
 
   function goParent() {
     setRole('parent')
@@ -21,9 +23,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex h-svh overflow-hidden bg-[#f3f4f6]">
-      <aside className="flex h-full w-44 shrink-0 flex-col border-r border-black/10 bg-white px-3 py-5">
-        <p className="mb-6 px-2 text-lg font-bold tracking-tight text-black">WriteGrow</p>
+    <div className={`flex h-svh overflow-hidden bg-[#f3f4f6] ${isChildPage ? 'child-theme' : ''}`}>
+      <aside className="app-sidebar flex h-full w-44 shrink-0 flex-col border-r border-black/10 bg-white px-3 py-5">
+        <div className="brand-lockup mb-6 px-2">
+          <span className="brand-sprout" aria-hidden>●</span>
+          <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+          {isChildPage && <p className="brand-caption">나의 글쓰기 놀이터</p>}
+        </div>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             if (item.role === 'parent') {
@@ -45,7 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      'rounded-md px-3 py-2.5 text-sm',
+                      'nav-item rounded-md px-3 py-2.5 text-sm',
                       isActive
                         ? 'bg-black font-semibold text-white'
                         : 'text-black/80 hover:bg-black/5',
@@ -67,10 +73,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             )
           })}
         </nav>
+        {isChildPage && (
+          <div className="sidebar-buddies" aria-hidden>
+            <img src="/writegrow-chick-writing.png" alt="" />
+            <p>우리 같이 써볼까?</p>
+          </div>
+        )}
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+        <header className="app-header flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
           <label className="relative w-full max-w-xs">
             <span className="sr-only">검색</span>
             <FiSearch
@@ -92,7 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="app-main min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   )
