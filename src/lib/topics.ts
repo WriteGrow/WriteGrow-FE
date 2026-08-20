@@ -5,3 +5,7 @@ export const TOPICS = [
   '가장 기억에 남는 여행',
   '친구와 함께한 놀이',
 ]
+
+// 정해진 주제 없이 쓰고 싶을 때 고르는 항목. TOPICS 에는 넣지 않는다 — ChildHome 의
+// "오늘의 추천 주제" 카드와 목 데이터(seed.ts)는 실제 주제 목록만 다뤄야 한다.
+export const FREE_TOPIC = '자유롭게 글쓰기'
