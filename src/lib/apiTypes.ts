@@ -200,7 +200,7 @@ export interface ProfileCreateRequest {
   birthYear: number
 }
 
-export interface ChildCard {
+export interface ParentHomeChildResponse {
   profileId: number
   nickname: string
   age: number
@@ -209,12 +209,124 @@ export interface ChildCard {
   writingStreakDays: number
   recentWritingId: number | null
   recentWritingPreview: string | null
-  topErrorTypes: string[]
+  topErrorTypes: WritingErrorType[]
   weeklyErrorCount: number
   errorCountDelta: number
 }
 
 export interface ParentHomeResponse {
   accountId: number
-  children: ChildCard[]
+  children: ParentHomeChildResponse[]
+}
+
+export type WeeklyFocusReason = 'MOST_REPEATED' | string
+
+export interface WeeklyReportSummaryResponse {
+  writingCount: number
+  confirmedCount: number
+  selfCorrectionCount: number
+  selfCorrectionDelta: number
+  confirmedErrorCount: number
+  previousWeekErrorCount: number
+  errorCountDelta: number
+  repeatedErrorTypeCount: number
+  reviewPendingCount: number
+}
+
+export interface WeeklyRepeatedErrorResponse {
+  errorType: WritingErrorType
+  label: string
+  cumulativeCount: number
+  weeklyCount: number
+  lastOccurredOn: string
+}
+
+export interface WeeklyDailyTrendResponse {
+  date: string
+  writingCount: number
+  sentenceCount: number
+  errorCount: number
+  selfCorrectionCount: number
+}
+
+export interface WeeklyNextFocusResponse {
+  errorType: WritingErrorType
+  label: string
+  reason: WeeklyFocusReason
+  basisValue: number
+}
+
+export interface WeeklyReportResponse {
+  profileId: number
+  nickname: string
+  weekStart: string
+  weekEnd: string
+  hasWriting: boolean
+  summary: WeeklyReportSummaryResponse
+  repeatedErrors: WeeklyRepeatedErrorResponse[]
+  dailyTrends: WeeklyDailyTrendResponse[]
+  nextFocus: WeeklyNextFocusResponse | null
+}
+
+export type WritingRevisionSource = 'OCR' | 'CHILD_EDIT' | 'SYSTEM' | string
+
+export interface WritingRevisionResponse {
+  revisionNo: number
+  content: string
+  source: WritingRevisionSource
+  createdAt: string
+}
+
+export interface ParentWritingDetailResponse {
+  writingId: number
+  profileId: number
+  nickname: string
+  topic: string
+  inputType: WritingInputType
+  status: WritingStatus
+  createdAt: string
+  submittedAt: string | null
+  originalText: string
+  finalText: string | null
+  sentenceCount: number
+  selfCorrectionCount: number
+  revisions: WritingRevisionResponse[]
+  confirmedErrors: ErrorCandidateResponse[]
+  reviewPendingCount: number
+}
+
+export interface WritingErrorReviewResponse {
+  writingId: number
+  status: WritingAnalysisStatus
+  analyzedText: string | null
+  reviewCount: number
+  confirmedCount: number
+  reviewCandidates: ErrorCandidateResponse[]
+  analyzedAt: string | null
+}
+
+export interface AggregatedErrorReviewCandidate extends ErrorCandidateResponse {
+  writingId: number
+  topic: string
+  analyzedText: string | null
+}
+
+export interface AggregatedChildErrorReview {
+  reviewCount: number
+  confirmedCount: number
+  candidates: AggregatedErrorReviewCandidate[]
+}
+
+export interface ChildErrorProfileItemResponse {
+  errorType: WritingErrorType
+  errorTypeLabel: string
+  occurrenceCount: number
+  correctionSuccessCount: number
+  correctionRate: number
+  lastOccurredOn: string
+}
+
+export interface ChildErrorProfileResponse {
+  profileId: number
+  items: ChildErrorProfileItemResponse[]
 }

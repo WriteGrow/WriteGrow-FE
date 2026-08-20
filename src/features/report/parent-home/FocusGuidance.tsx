@@ -1,23 +1,21 @@
-import type { ChildCard } from '../../../lib/apiTypes'
+import type { ParentHomeChild } from './errorTypeLabels'
+import { errorTypeLabels } from './errorTypeLabels'
 
-function deltaLabel(delta: number) {
-  if (delta < 0) return `${Math.abs(delta)}건 감소`
-  if (delta > 0) return `${delta}건 증가`
-  return '변화 없음'
-}
+export function FocusGuidance({ child }: { child: ParentHomeChild }) {
+  const types = errorTypeLabels(child.topErrorTypes)
+  const focusArea = types[0] ?? '기초 맞춤법'
+  const focusGuidance =
+    types.length > 0
+      ? `${types.join('·')} 오류가 반복되고 있어요. 짧은 문장을 함께 읽어보며 고치는 연습을 해보세요.`
+      : '이번 주에는 확정된 반복 오류가 없어요. 꾸준한 글쓰기 습관을 이어가 보세요.'
 
-export function FocusGuidance({ child }: { child: ChildCard }) {
   return (
     <div className="rounded-[10px] border border-black/10 bg-white p-5">
-      <h3 className="mb-3 text-[16px] font-semibold text-black">{child.nickname} — 다음 집중 영역</h3>
-      <p className="mb-3 text-[12px] leading-relaxed text-black/75">
-        이번 주 오류 {child.weeklyErrorCount}개, 지난주 대비 {deltaLabel(child.errorCountDelta)}예요.
-      </p>
-      {child.topErrorTypes.length > 0 && (
-        <p className="text-[12px] font-medium text-black">
-          추천 집중 영역: {child.topErrorTypes.join(', ')}
-        </p>
-      )}
+      <h3 className="mb-3 text-[16px] font-semibold text-black">
+        {child.nickname} — 다음 집중 영역
+      </h3>
+      <p className="mb-3 text-[12px] leading-relaxed text-black/75">{focusGuidance}</p>
+      <p className="text-[12px] font-medium text-black">추천 집중 영역: {focusArea}</p>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import type { ParentWeeklyReport } from '../../mocks/seed'
+import { getChildWeeklyReport } from '../../lib/api'
 import { LowConfidenceReview } from './parent-report/LowConfidenceReview'
 import { PostRevisionTable } from './parent-report/PostRevisionTable'
 import { RepeatedErrorStatus } from './parent-report/RepeatedErrorStatus'
@@ -8,18 +8,25 @@ import { ReportFocusSection } from './parent-report/ReportFocusSection'
 import { ReportSummaryCards } from './parent-report/ReportSummaryCards'
 import { WeeklyTrendTable } from './parent-report/WeeklyTrendTable'
 
+function parseChildProfileId(value: string) {
+  const normalized = value.replace(/^child-/, '')
+  const profileId = Number(normalized)
+  return Number.isFinite(profileId) && profileId > 0 ? profileId : null
+}
+
 export function ParentReport() {
   const { childId = '' } = useParams()
+  const childProfileId = parseChildProfileId(childId)
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['children', childId, 'report', 'weekly'],
-    enabled: Boolean(childId),
-    queryFn: async (): Promise<ParentWeeklyReport> => {
-      const res = await fetch(`/api/children/${childId}/report/weekly`)
-      if (!res.ok) throw new Error('failed to load weekly report')
-      return res.json()
-    },
+    queryKey: ['children', childProfileId, 'weekly-report'],
+    enabled: childProfileId !== null,
+    queryFn: () => getChildWeeklyReport(childProfileId!),
   })
+
+  if (childProfileId === null) {
+    return <p className="text-[14px] text-red-700">아동 정보를 확인할 수 없어요.</p>
+  }
 
   if (isLoading) {
     return <p className="text-[14px] text-black/50">불러오는 중...</p>
@@ -33,10 +40,13 @@ export function ParentReport() {
     <div className="mx-auto max-w-5xl space-y-6">
       <ReportSummaryCards report={data} />
       <RepeatedErrorStatus report={data} />
-      <WeeklyTrendTable trends={data.trends} />
+      <WeeklyTrendTable trends={data.dailyTrends} />
       <ReportFocusSection report={data} />
-      <LowConfidenceReview childId={data.childId} pendingCount={data.lowConfidencePending} />
-      <PostRevisionTable childId={data.childId} posts={data.posts} />
+      <LowConfidenceReview
+        childProfileId={data.profileId}
+        pendingCount={data.summary.reviewPendingCount}
+      />
+      <PostRevisionTable childProfileId={data.profileId} />
     </div>
   )
 }

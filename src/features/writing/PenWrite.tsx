@@ -94,7 +94,7 @@ export function PenWrite() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-4">
         <div className="flex flex-wrap shrink-0 items-center gap-2">
-          <div className="flex shrink-0 gap-1 rounded-[5px] border border-black/15 p-1">
+          <div className="pen-tool-toggle flex shrink-0 gap-1 rounded-[5px] border border-black/15 p-1">
             <button
               type="button"
               onClick={() => setTool('pen')}
@@ -144,7 +144,7 @@ export function PenWrite() {
             role="switch"
             aria-checked={stylusOnly}
             onClick={() => setStylusOnly((v) => !v)}
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+            className={`stylus-toggle relative h-7 w-12 shrink-0 rounded-full transition-colors ${
               stylusOnly ? 'bg-black' : 'bg-ink/20'
             }`}
           >

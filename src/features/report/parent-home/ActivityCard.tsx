@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import type { ChildCard } from '../../../lib/apiTypes'
+import type { ParentHomeChild } from './errorTypeLabels'
 
-export function ActivityCard({ child }: { child: ChildCard }) {
+export function ActivityCard({ child }: { child: ParentHomeChild }) {
   return (
     <article className="flex flex-col rounded-[10px] border border-black/10 bg-white p-5 shadow-sm">
       <h3 className="mb-4 text-[16px] font-semibold text-black">
@@ -25,16 +25,16 @@ export function ActivityCard({ child }: { child: ChildCard }) {
 
       <div className="mb-3 flex items-start justify-between gap-3 border-t border-black/10 pt-3 text-[12px]">
         <p className="min-w-0 text-black/70">
-          <span className="text-black/45">최근 글 : {child.recentWritingPreview ?? '아직 없어요'}</span>
+          <span className="text-black/45">
+            최근 글 : {child.recentWritingPreview ?? '아직 작성한 글이 없어요'}
+          </span>
         </p>
-        {child.recentWritingId !== null && (
-          <Link
-            to={`/parent/children/${child.profileId}/posts/${child.recentWritingId}`}
-            className="shrink-0 text-black underline-offset-2 hover:underline"
-          >
-            글 기록 보기
-          </Link>
-        )}
+        <Link
+          to={`/parent/children/${child.profileId}/writings`}
+          className="shrink-0 text-black underline-offset-2 hover:underline"
+        >
+          글 기록 보기
+        </Link>
       </div>
 
       <Link

@@ -148,60 +148,54 @@ export function getOcrSample(strokeCount: number): string {
 }
 
 export interface ParentChildSummary {
-  childId: string
-  name: string
-  ageLabel: string
-  postsThisWeek: number
-  selfCorrections: number
-  streakDays: number
-  recentTitle: string
-  repeatedErrorTypes: string[]
-  errorsThisWeek: number
-  errorDeltaVsLastWeek: number // 음수 = 감소
-  selfCorrectionRate: number // 0~100
-  focusArea: string
-  focusGuidance: string
+  profileId: number
+  nickname: string
+  age: number
+  weeklyWritingCount: number
+  selfCorrectionCount: number
+  writingStreakDays: number
+  recentWritingId: number | null
+  recentWritingPreview: string | null
+  topErrorTypes: Array<'SPELLING' | 'SPACING' | 'FINAL_CONSONANT' | 'PARTICLE_ENDING' | 'SENTENCE_STRUCTURE' | 'VOCABULARY'>
+  weeklyErrorCount: number
+  errorCountDelta: number
 }
 
 export const parentHomeSummaries: ParentChildSummary[] = [
   {
-    childId: 'child-1',
-    name: '김민준',
-    ageLabel: '8세',
-    postsThisWeek: 3,
-    selfCorrections: 2,
-    streakDays: 5,
-    recentTitle: '오늘 강아지랑 산책했어요',
-    repeatedErrorTypes: ['띄어쓰기', '받침'],
-    errorsThisWeek: 4,
-    errorDeltaVsLastWeek: -2,
-    selfCorrectionRate: 67,
-    focusArea: '낱말 사이 띄어쓰기',
-    focusGuidance: '받침 오류가 꾸준히 줄고 있어요. 이번 주에는 띄어쓰기 습관을 함께 살펴보세요.',
+    profileId: 1,
+    nickname: '민준',
+    age: 8,
+    weeklyWritingCount: 3,
+    selfCorrectionCount: 2,
+    writingStreakDays: 5,
+    recentWritingId: 12,
+    recentWritingPreview: '오늘 강아지랑 산책했어요',
+    topErrorTypes: ['SPELLING', 'SPACING'],
+    weeklyErrorCount: 4,
+    errorCountDelta: -2,
   },
   {
-    childId: 'child-2',
-    name: '김서연',
-    ageLabel: '10세',
-    postsThisWeek: 1,
-    selfCorrections: 0,
-    streakDays: 1,
-    recentTitle: '그림 그리는 게 재미있다',
-    repeatedErrorTypes: ['조사·어미', '띄어쓰기'],
-    errorsThisWeek: 7,
-    errorDeltaVsLastWeek: 0,
-    selfCorrectionRate: 0,
-    focusArea: '조사·어미 바르게 쓰기',
-    focusGuidance:
-      '조사와 어미 사용에서 같은 오류가 반복되고 있어요. 짧은 문장 쓰기를 격려해 보세요.',
+    profileId: 2,
+    nickname: '서연',
+    age: 10,
+    weeklyWritingCount: 1,
+    selfCorrectionCount: 0,
+    writingStreakDays: 1,
+    recentWritingId: 15,
+    recentWritingPreview: '그림 그리는 게 재미있다',
+    topErrorTypes: ['PARTICLE_ENDING', 'SPACING'],
+    weeklyErrorCount: 7,
+    errorCountDelta: 0,
   },
 ]
 
 export interface WeeklyTrendRow {
   date: string
+  writingCount: number
   sentenceCount: number
-  errorCandidates: number
-  selfCorrections: number
+  errorCount: number
+  selfCorrectionCount: number
 }
 
 export interface WeeklyPostRow {
@@ -214,127 +208,136 @@ export interface WeeklyPostRow {
 }
 
 export interface ParentWeeklyReport {
-  childId: string
-  childName: string
-  postsThisWeek: number
-  postsGoal: number
-  selfCorrections: number
-  selfCorrectionDelta: number
-  repeatedErrorTypeCount: number
-  repeatedErrorFocus: string
-  lowConfidencePending: number
-  majorRepeatedErrors: string[]
-  correctionTarget: number
-  correctionDone: number
-  cumulativeSelfCorrections: number
-  trends: WeeklyTrendRow[]
-  focusAreaTitle: string
-  focusAreaDescription: string
-  guidanceTitle: string
-  guidanceDescription: string
-  posts: WeeklyPostRow[]
+  profileId: number
+  nickname: string
+  weekStart: string
+  weekEnd: string
+  hasWriting: boolean
+  summary: {
+    writingCount: number
+    confirmedCount: number
+    selfCorrectionCount: number
+    selfCorrectionDelta: number
+    confirmedErrorCount: number
+    previousWeekErrorCount: number
+    errorCountDelta: number
+    repeatedErrorTypeCount: number
+    reviewPendingCount: number
+  }
+  repeatedErrors: Array<{
+    errorType: string
+    label: string
+    cumulativeCount: number
+    weeklyCount: number
+    lastOccurredOn: string
+  }>
+  dailyTrends: WeeklyTrendRow[]
+  nextFocus: {
+    errorType: string
+    label: string
+    reason: string
+    basisValue: number
+  } | null
 }
 
 export const parentWeeklyReports: Record<string, ParentWeeklyReport> = {
-  'child-1': {
-    childId: 'child-1',
-    childName: '김민준',
-    postsThisWeek: 5,
-    postsGoal: 5,
-    selfCorrections: 3,
-    selfCorrectionDelta: 1,
-    repeatedErrorTypeCount: 4,
-    repeatedErrorFocus: '띄어쓰기·받침 중심',
-    lowConfidencePending: 2,
-    majorRepeatedErrors: ['띄어쓰기', '받침', '조사·어미', '어휘 표현'],
-    correctionTarget: 4,
-    correctionDone: 3,
-    cumulativeSelfCorrections: 12,
-    trends: [
-      { date: '2026.08.10', sentenceCount: 6, errorCandidates: 3, selfCorrections: 1 },
-      { date: '2026.08.11', sentenceCount: 8, errorCandidates: 4, selfCorrections: 2 },
-      { date: '2026.08.12', sentenceCount: 5, errorCandidates: 2, selfCorrections: 1 },
-      { date: '2026.08.13', sentenceCount: 7, errorCandidates: 3, selfCorrections: 2 },
-      { date: '2026.08.14', sentenceCount: 9, errorCandidates: 2, selfCorrections: 2 },
-    ],
-    focusAreaTitle: '받침 표기',
-    focusAreaDescription:
-      '3주 연속 반복 오류로 확인되었습니다. 짧은 문장을 직접 읽어보는 활동을 권장합니다.',
-    guidanceTitle: '조사·어미 연결',
-    guidanceDescription: '자기교정 성공률이 낮아 추가 격려가 필요합니다.',
-    posts: [
+  '1': {
+    profileId: 1,
+    nickname: '민준',
+    weekStart: '2026-08-17',
+    weekEnd: '2026-08-23',
+    hasWriting: true,
+    summary: {
+      writingCount: 5,
+      confirmedCount: 5,
+      selfCorrectionCount: 3,
+      selfCorrectionDelta: 1,
+      confirmedErrorCount: 4,
+      previousWeekErrorCount: 6,
+      errorCountDelta: -2,
+      repeatedErrorTypeCount: 4,
+      reviewPendingCount: 2,
+    },
+    repeatedErrors: [
       {
-        postId: 'post-child-1-7',
-        writtenAt: '2026.08.14',
-        title: '친구와 함께한 놀이',
-        errorCount: 2,
-        selfCorrections: 1,
-        status: '교정 완료',
+        errorType: 'SPACING',
+        label: '띄어쓰기',
+        cumulativeCount: 12,
+        weeklyCount: 3,
+        lastOccurredOn: '2026-08-18',
       },
       {
-        postId: 'post-child-1-6',
-        writtenAt: '2026.08.13',
-        title: '가장 기억에 남는 여행',
-        errorCount: 3,
-        selfCorrections: 2,
-        status: '교정 완료',
+        errorType: 'FINAL_CONSONANT',
+        label: '받침',
+        cumulativeCount: 10,
+        weeklyCount: 2,
+        lastOccurredOn: '2026-08-19',
       },
       {
-        postId: 'post-child-1-5',
-        writtenAt: '2026.08.12',
-        title: '내가 좋아하는 동물',
-        errorCount: 1,
-        selfCorrections: 0,
-        status: '검토 대기',
+        errorType: 'PARTICLE_ENDING',
+        label: '조사·어미',
+        cumulativeCount: 5,
+        weeklyCount: 1,
+        lastOccurredOn: '2026-08-17',
       },
       {
-        postId: 'post-child-1-4',
-        writtenAt: '2026.08.11',
-        title: '주말에 가족과 한 일',
-        errorCount: 4,
-        selfCorrections: 2,
-        status: '교정 완료',
+        errorType: 'VOCABULARY',
+        label: '어휘',
+        cumulativeCount: 3,
+        weeklyCount: 1,
+        lastOccurredOn: '2026-08-20',
       },
     ],
+    dailyTrends: [
+      { date: '2026-08-17', writingCount: 1, sentenceCount: 4, errorCount: 1, selfCorrectionCount: 1 },
+      { date: '2026-08-18', writingCount: 1, sentenceCount: 3, errorCount: 2, selfCorrectionCount: 1 },
+      { date: '2026-08-19', writingCount: 1, sentenceCount: 5, errorCount: 1, selfCorrectionCount: 0 },
+      { date: '2026-08-20', writingCount: 1, sentenceCount: 4, errorCount: 0, selfCorrectionCount: 1 },
+      { date: '2026-08-21', writingCount: 1, sentenceCount: 6, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-22', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-23', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+    ],
+    nextFocus: {
+      errorType: 'FINAL_CONSONANT',
+      label: '받침',
+      reason: 'MOST_REPEATED',
+      basisValue: 12,
+    },
   },
-  'child-2': {
-    childId: 'child-2',
-    childName: '김서연',
-    postsThisWeek: 1,
-    postsGoal: 5,
-    selfCorrections: 0,
-    selfCorrectionDelta: -1,
-    repeatedErrorTypeCount: 2,
-    repeatedErrorFocus: '조사·어미·띄어쓰기',
-    lowConfidencePending: 3,
-    majorRepeatedErrors: ['조사·어미', '띄어쓰기'],
-    correctionTarget: 3,
-    correctionDone: 0,
-    cumulativeSelfCorrections: 5,
-    trends: [
-      { date: '8/12', sentenceCount: 4, errorCandidates: 5, selfCorrections: 0 },
-      { date: '8/14', sentenceCount: 6, errorCandidates: 4, selfCorrections: 0 },
+  '3': {
+    profileId: 3,
+    nickname: '서연',
+    weekStart: '2026-08-17',
+    weekEnd: '2026-08-23',
+    hasWriting: false,
+    summary: {
+      writingCount: 0,
+      confirmedCount: 0,
+      selfCorrectionCount: 0,
+      selfCorrectionDelta: 0,
+      confirmedErrorCount: 0,
+      previousWeekErrorCount: 0,
+      errorCountDelta: 0,
+      repeatedErrorTypeCount: 0,
+      reviewPendingCount: 0,
+    },
+    repeatedErrors: [],
+    dailyTrends: [
+      { date: '2026-08-17', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-18', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-19', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-20', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-21', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-22', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
+      { date: '2026-08-23', writingCount: 0, sentenceCount: 0, errorCount: 0, selfCorrectionCount: 0 },
     ],
-    focusAreaTitle: '조사·어미 바르게 쓰기',
-    focusAreaDescription:
-      '조사와 어미 사용에서 같은 오류가 반복되고 있어요. 짧은 문장 쓰기를 격려해 보세요.',
-    guidanceTitle: '띄어쓰기 습관',
-    guidanceDescription: '작성량은 적지만 오류 밀도가 높아 함께 읽어보는 시간이 필요합니다.',
-    posts: [
-      {
-        postId: 'post-child-2-6',
-        writtenAt: '2026.08.14',
-        title: '그림 그리는 게 재미있다',
-        errorCount: 7,
-        selfCorrections: 0,
-        status: '검토 대기',
-      },
-    ],
+    nextFocus: null,
   },
 }
 
-export function weeklyReportByChild(childId: string): ParentWeeklyReport | undefined {
-  return parentWeeklyReports[childId]
+export function weeklyReportByChild(childProfileId: string | number): ParentWeeklyReport | undefined {
+  const key = String(childProfileId).replace(/^child-/, '')
+  return parentWeeklyReports[key]
 }
 
 export interface PostChange {

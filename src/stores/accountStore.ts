@@ -58,3 +58,7 @@ export function hasCompletedOnboarding(): boolean {
 export function getActiveChildProfileId(): number | undefined {
   return useAccountStore.getState().activeChildProfileId ?? undefined
 }
+
+export function getParentProfileId(): number | undefined {
+  return useAccountStore.getState().parentProfileId ?? undefined
+}

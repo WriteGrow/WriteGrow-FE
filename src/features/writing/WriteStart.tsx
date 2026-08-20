@@ -35,7 +35,7 @@ export function WriteStart() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="write-start space-y-6">
       <h1 className="text-[16px] font-semibold text-black">무엇에 대해 써볼까?</h1>
 
       <div className="flex flex-wrap gap-2">
@@ -90,6 +90,15 @@ export function WriteStart() {
             다 썼어요
           </button>
         </div>
+      )}
+
+      {!keyboardOpen && (
+        <img
+          src="/writegrow-brainstorming-hills.png"
+          alt=""
+          aria-hidden
+          className="write-start-buddies"
+        />
       )}
     </div>
   )

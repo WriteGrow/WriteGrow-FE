@@ -1,4 +1,5 @@
-import type { ChildCard } from '../../../lib/apiTypes'
+import type { ParentHomeChild } from './errorTypeLabels'
+import { errorTypeLabels } from './errorTypeLabels'
 
 function errorDeltaLabel(delta: number) {
   if (delta < 0) return `↓ ${Math.abs(delta)}건 감소`
@@ -6,17 +7,17 @@ function errorDeltaLabel(delta: number) {
   return '변화 없음'
 }
 
-export function ErrorStats({ child }: { child: ChildCard }) {
+export function ErrorStats({ child }: { child: ParentHomeChild }) {
   const delta = child.errorCountDelta
+  const types = errorTypeLabels(child.topErrorTypes)
+
   return (
     <div className="rounded-[10px] border border-black/10 bg-white p-5">
       <h3 className="mb-3 text-[16px] font-semibold text-black">{child.nickname}</h3>
       <dl className="space-y-2.5 text-[12px]">
         <div className="flex justify-between gap-4">
           <dt className="text-black/50">반복 오류 유형</dt>
-          <dd className="text-right font-medium">
-            {child.topErrorTypes.length > 0 ? child.topErrorTypes.join(', ') : '없음'}
-          </dd>
+          <dd className="text-right font-medium">{types.length > 0 ? types.join(', ') : '없음'}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-black/50">이번 주 오류 수</dt>
@@ -24,11 +25,11 @@ export function ErrorStats({ child }: { child: ChildCard }) {
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-black/50">지난 주 대비</dt>
-          <dd
-            className={`font-medium ${delta > 0 ? 'text-red-700' : ''}`}
-          >
-            {errorDeltaLabel(delta)}
-          </dd>
+          <dd className={`font-medium ${delta > 0 ? 'text-red-700' : ''}`}>{errorDeltaLabel(delta)}</dd>
+        </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-black/50">자기교정 완료</dt>
+          <dd className="font-medium">{child.selfCorrectionCount}회</dd>
         </div>
       </dl>
     </div>

@@ -17,6 +17,7 @@ import { ParentHome } from '../features/report/ParentHome'
 import { ParentPost } from '../features/report/ParentPost'
 import { ParentReport } from '../features/report/ParentReport'
 import { ParentReview } from '../features/report/ParentReview'
+import { ParentWritings } from '../features/report/ParentWritings'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/child" replace /> },
@@ -63,6 +64,18 @@ export const router = createBrowserRouter([
         <RoleGuard allow="parent">
           <ParentLayout>
             <ParentReport />
+          </ParentLayout>
+        </RoleGuard>
+      </AccountGate>
+    ),
+  },
+  {
+    path: '/parent/children/:childId/writings',
+    element: (
+      <AccountGate>
+        <RoleGuard allow="parent">
+          <ParentLayout>
+            <ParentWritings />
           </ParentLayout>
         </RoleGuard>
       </AccountGate>
