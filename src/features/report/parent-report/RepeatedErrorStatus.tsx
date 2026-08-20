@@ -1,8 +1,17 @@
+import { useQuery } from '@tanstack/react-query'
+import { getChildErrorProfile } from '../../../lib/api'
 import type { WeeklyReportResponse } from '../../../lib/apiTypes'
 
 export function RepeatedErrorStatus({ report }: { report: WeeklyReportResponse }) {
-  const { summary, repeatedErrors } = report
-  const cumulative = repeatedErrors.reduce((total, error) => total + error.cumulativeCount, 0)
+  const { summary } = report
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['children', report.profileId, 'error-profile'],
+    queryFn: () => getChildErrorProfile(report.profileId),
+  })
+
+  const items = data?.items ?? []
+  const repeatedItems = items.filter((item) => item.occurrenceCount > 0)
+  const cumulative = repeatedItems.reduce((total, item) => total + item.occurrenceCount, 0)
 
   return (
     <section className="space-y-4">
@@ -11,19 +20,25 @@ export function RepeatedErrorStatus({ report }: { report: WeeklyReportResponse }
         <div className="grid items-center gap-6 md:grid-cols-2">
           <div className="flex flex-col justify-center">
             <p className="mb-3 text-[12px] text-black/50">주요 반복 오류</p>
-            {repeatedErrors.length > 0 ? (
+            {isLoading && <p className="text-[12px] text-black/45">불러오는 중...</p>}
+            {isError && (
+              <p className="text-[12px] text-red-700">반복 오류 프로필을 불러오지 못했어요.</p>
+            )}
+            {!isLoading && !isError && repeatedItems.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {repeatedErrors.map((error) => (
+                {repeatedItems.map((item) => (
                   <span
-                    key={error.errorType}
+                    key={item.errorType}
                     className="rounded-full border border-black/10 px-3 py-1 text-[12px] text-black"
                   >
-                    {error.label}
+                    {item.errorTypeLabel}
+                    <span className="ml-1 text-black/45">{item.occurrenceCount}회</span>
                   </span>
                 ))}
               </div>
-            ) : (
-              <p className="text-[12px] text-black/45">이번 주 반복 오류가 없어요.</p>
+            )}
+            {!isLoading && !isError && repeatedItems.length === 0 && (
+              <p className="text-[12px] text-black/45">누적된 반복 오류가 없어요.</p>
             )}
           </div>
           <div>

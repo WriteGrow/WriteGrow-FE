@@ -7,6 +7,9 @@ import type {
   PageResponse,
   ParentHomeResponse,
   ParentWritingDetailResponse,
+  ChildErrorProfileResponse,
+  AggregatedChildErrorReview,
+  WritingErrorReviewResponse,
   StrokeBatchAppendResponse,
   StrokeData,
   WritingCreateResponse,
@@ -235,4 +238,62 @@ export async function getChildWriting(
     `/api/children/${childProfileId}/writings/${writingId}`,
     { headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) } },
   )
+}
+
+export async function getWritingErrorReview(writingId: number): Promise<WritingErrorReviewResponse> {
+  return request<WritingErrorReviewResponse>(`/api/writings/${writingId}/error-review`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
+}
+
+/** 자녀 전체 글의 error-review를 모아 낮은 확신도 후보를 합산한다. 분석 없는 글(404 등)은 건너뛴다. */
+export async function getChildErrorReviews(
+  childProfileId: number,
+): Promise<AggregatedChildErrorReview> {
+  const writings: WritingSummaryResponse[] = []
+  let page = 0
+  let last = false
+
+  while (!last) {
+    const response = await getChildWritings(childProfileId, { page, size: 50 })
+    writings.push(...response.content)
+    last = response.last || response.content.length === 0
+    page += 1
+    if (page > 20) break
+  }
+
+  const reviews = await Promise.all(
+    writings.map(async (writing) => {
+      try {
+        const review = await getWritingErrorReview(writing.writingId)
+        return { writing, review }
+      } catch {
+        return null
+      }
+    }),
+  )
+
+  const candidates = reviews.flatMap((entry) => {
+    if (!entry) return []
+    return entry.review.reviewCandidates.map((candidate) => ({
+      ...candidate,
+      writingId: entry.writing.writingId,
+      topic: entry.writing.topic,
+      analyzedText: entry.review.analyzedText,
+    }))
+  })
+
+  return {
+    reviewCount: candidates.length,
+    confirmedCount: reviews.reduce((total, entry) => total + (entry?.review.confirmedCount ?? 0), 0),
+    candidates,
+  }
+}
+
+export async function getChildErrorProfile(
+  childProfileId: number,
+): Promise<ChildErrorProfileResponse> {
+  return request<ChildErrorProfileResponse>(`/api/children/${childProfileId}/error-profile`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
 }

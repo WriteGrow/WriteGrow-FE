@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import type {
   AnalysisResponse,
+  ChildErrorProfileResponse,
   ErrorCandidateResponse,
   PageResponse,
   ParentWritingDetailResponse,
@@ -8,7 +9,9 @@ import type {
   WritingAnalysisStatus,
   WritingCreateResponse,
   WritingDetailResponse,
+  WritingErrorReviewResponse,
   WritingErrorsResponse,
+  WritingErrorType,
   WritingInputType,
   WritingStatus,
   WritingSubmitResponse,
@@ -216,6 +219,58 @@ function toParentWritingDetail(
       ? Math.max(0, parentPost.selfCorrectionTotal - parentPost.selfCorrectionDone)
       : 0,
   }
+}
+
+const ERROR_PROFILE_TYPES: Array<{ errorType: WritingErrorType; errorTypeLabel: string }> = [
+  { errorType: 'SPELLING', errorTypeLabel: '맞춤법' },
+  { errorType: 'SPACING', errorTypeLabel: '띄어쓰기' },
+  { errorType: 'FINAL_CONSONANT', errorTypeLabel: '받침' },
+  { errorType: 'PARTICLE_ENDING', errorTypeLabel: '조사·어미' },
+  { errorType: 'SENTENCE_STRUCTURE', errorTypeLabel: '문장 구조' },
+  { errorType: 'VOCABULARY', errorTypeLabel: '어휘' },
+]
+
+function toErrorReview(writing: MockWriting): WritingErrorReviewResponse {
+  const confirmed = writing.errors.filter((error) => error.confidence >= 0.9)
+  const reviewCandidates = writing.errors.filter((error) => error.confidence < 0.9)
+  const candidates =
+    reviewCandidates.length > 0
+      ? reviewCandidates
+      : writing.errors.slice(0, Math.min(2, writing.errors.length)).map((error) => ({
+          ...error,
+          confidence: Math.min(error.confidence, 0.72),
+        }))
+
+  return {
+    writingId: writing.writingId,
+    status: writing.errorsStatus,
+    analyzedText: writing.finalText ?? writing.originalText,
+    reviewCount: candidates.length,
+    confirmedCount: confirmed.length || Math.max(0, writing.errors.length - candidates.length),
+    reviewCandidates: candidates,
+    analyzedAt: writing.submittedAt,
+  }
+}
+
+function toErrorProfile(childProfileId: number): ChildErrorProfileResponse {
+  const report = weeklyReportByChild(String(childProfileId))
+  const byType = new Map((report?.repeatedErrors ?? []).map((item) => [item.errorType, item]))
+
+  const items = ERROR_PROFILE_TYPES.map(({ errorType, errorTypeLabel }) => {
+    const found = byType.get(errorType)
+    const occurrenceCount = found?.cumulativeCount ?? 0
+    const correctionSuccessCount = Math.round(occurrenceCount * 0.67)
+    return {
+      errorType,
+      errorTypeLabel: found?.label ?? errorTypeLabel,
+      occurrenceCount,
+      correctionSuccessCount,
+      correctionRate: occurrenceCount === 0 ? 0 : correctionSuccessCount / occurrenceCount,
+      lastOccurredOn: found?.lastOccurredOn ?? '',
+    }
+  }).sort((a, b) => b.occurrenceCount - a.occurrenceCount)
+
+  return { profileId: childProfileId, items }
 }
 
 function toErrors(writing: MockWriting): WritingErrorsResponse {
@@ -642,6 +697,39 @@ export const handlers = [
     }
 
     return success(toParentWritingDetail(writing, childProfileId))
+  }),
+
+  http.get('/api/writings/:writingId/error-review', ({ params, request }) => {
+    const profileHeader = request.headers.get('X-Profile-Id')
+    if (!profileHeader) {
+      return failure(400, 'MISSING_PROFILE_HEADER', 'X-Profile-Id 헤더가 필요합니다.')
+    }
+
+    const writingId = Number(params.writingId)
+    if (!Number.isFinite(writingId)) {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+
+    const writing = findMockWriting(writingId)
+    if (!writing) {
+      return failure(404, 'WRITING_NOT_FOUND', '글을 찾을 수 없습니다.')
+    }
+
+    return success(toErrorReview(writing))
+  }),
+
+  http.get('/api/children/:childProfileId/error-profile', ({ params, request }) => {
+    const profileHeader = request.headers.get('X-Profile-Id')
+    if (!profileHeader) {
+      return failure(400, 'MISSING_PROFILE_HEADER', 'X-Profile-Id 헤더가 필요합니다.')
+    }
+
+    const childProfileId = Number(params.childProfileId)
+    if (!Number.isFinite(childProfileId)) {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+
+    return success(toErrorProfile(childProfileId))
   }),
 
   http.get('/api/children/:childId/review', ({ params }) => {

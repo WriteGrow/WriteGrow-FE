@@ -267,3 +267,39 @@ export interface ParentWritingDetailResponse {
   confirmedErrors: ErrorCandidateResponse[]
   reviewPendingCount: number
 }
+
+export interface WritingErrorReviewResponse {
+  writingId: number
+  status: WritingAnalysisStatus
+  analyzedText: string | null
+  reviewCount: number
+  confirmedCount: number
+  reviewCandidates: ErrorCandidateResponse[]
+  analyzedAt: string | null
+}
+
+export interface AggregatedErrorReviewCandidate extends ErrorCandidateResponse {
+  writingId: number
+  topic: string
+  analyzedText: string | null
+}
+
+export interface AggregatedChildErrorReview {
+  reviewCount: number
+  confirmedCount: number
+  candidates: AggregatedErrorReviewCandidate[]
+}
+
+export interface ChildErrorProfileItemResponse {
+  errorType: WritingErrorType
+  errorTypeLabel: string
+  occurrenceCount: number
+  correctionSuccessCount: number
+  correctionRate: number
+  lastOccurredOn: string
+}
+
+export interface ChildErrorProfileResponse {
+  profileId: number
+  items: ChildErrorProfileItemResponse[]
+}
