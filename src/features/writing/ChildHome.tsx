@@ -27,6 +27,7 @@ const TOPIC_CARDS = [
 export function ChildHome() {
   const navigate = useNavigate()
   const resetWriting = useWritingStore((s) => s.reset)
+  const setTopic = useWritingStore((s) => s.setTopic)
   const activeChildProfileId = useAccountStore((s) => s.activeChildProfileId)
   const { data: writings, isLoading } = useQuery({
     queryKey: ['writings', activeChildProfileId, 0, 5],
@@ -46,8 +47,9 @@ export function ChildHome() {
   // 그래서 자기교정 성공을 칭찬하지 않고 다음에 고칠 것을 안내한다.
   const latestErrorToFix = latestErrors?.errors[0]
 
-  function startWriting() {
+  function startWriting(topic?: string) {
     resetWriting()
+    if (topic) setTopic(topic)
     navigate('/child/write')
   }
 
@@ -69,7 +71,7 @@ export function ChildHome() {
             <p className="mb-4 text-[14px] text-black/70">자유롭게 1~3문장을 써 보세요. 틀려도 괜찮아요!</p>
             <button
               type="button"
-              onClick={startWriting}
+              onClick={() => startWriting()}
               className="w-full rounded-[5px] bg-black px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-black/90"
             >
               새 글쓰기 시작하기
@@ -84,7 +86,7 @@ export function ChildHome() {
                 <button
                   key={topic}
                   type="button"
-                  onClick={startWriting}
+                  onClick={() => startWriting(topic)}
                   className={`topic-card topic-card--${color}`}
                 >
                   <span className="topic-card-label">{label}</span>
