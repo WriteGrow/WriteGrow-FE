@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { getWritings } from '../../lib/api'
 import type { WritingStatus } from '../../lib/apiTypes'
-import { DEV_CHILD_PROFILE_ID } from '../../lib/devChild'
+import { useAccountStore } from '../../stores/accountStore'
 
 // 서버는 글별 오류 개수를 주지 않는다. 개수 대신 글 상태로 라벨을 만든다.
 const STATUS_LABELS: Record<WritingStatus, string> = {
@@ -15,9 +15,11 @@ const STATUS_LABELS: Record<WritingStatus, string> = {
 
 export function PostList() {
   const navigate = useNavigate()
+  const activeChildProfileId = useAccountStore((s) => s.activeChildProfileId)
   const { data: writings, isLoading } = useQuery({
-    queryKey: ['writings', DEV_CHILD_PROFILE_ID, 0, 20],
+    queryKey: ['writings', activeChildProfileId, 0, 20],
     queryFn: () => getWritings({ page: 0, size: 20 }),
+    enabled: activeChildProfileId !== null,
   })
   const posts = writings?.content
 

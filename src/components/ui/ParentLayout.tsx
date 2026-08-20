@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { FiSearch } from 'react-icons/fi'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useRoleStore } from '../../stores/roleStore'
+import { ProfileInfo } from './ProfileInfo'
 import { RoleSwitcher } from './RoleSwitcher'
 
 const navItems = [
@@ -70,7 +71,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+        <header className="relative z-20 flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
           <label className="relative w-full max-w-xs">
             <span className="sr-only">검색</span>
             <FiSearch
@@ -84,12 +85,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             />
           </label>
           <RoleSwitcher />
-          <button
-            type="button"
-            className="shrink-0 rounded-[5px] border border-black/15 px-3 py-2 text-[14px] text-black/50"
-          >
-            프로
-          </button>
+          <ProfileInfo />
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>

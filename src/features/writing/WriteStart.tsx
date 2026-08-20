@@ -7,10 +7,11 @@ import { useWritingStore } from '../../stores/writingStore'
 
 export function WriteStart() {
   const navigate = useNavigate()
+  const storeTopic = useWritingStore((s) => s.topic)
   const setTopic = useWritingStore((s) => s.setTopic)
   const setMode = useWritingStore((s) => s.setMode)
   const setContent = useWritingStore((s) => s.setContent)
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(storeTopic)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [draft, setDraft] = useState('')
 

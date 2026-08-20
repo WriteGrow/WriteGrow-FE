@@ -173,6 +173,33 @@ export interface WritingErrorsResponse {
   failureReason: string | null
 }
 
+export interface AccountResponse {
+  id: number
+  name: string
+  createdAt: string
+}
+
+export interface AccountCreateRequest {
+  name: string
+}
+
+export type ProfileRole = 'PARENTS' | 'CHILD'
+
+export interface ProfileResponse {
+  id: number
+  accountId: number
+  role: ProfileRole
+  nickname: string
+  birthYear: number
+  consentConfirmed: boolean
+}
+
+export interface ProfileCreateRequest {
+  role: ProfileRole
+  nickname: string
+  birthYear: number
+}
+
 export interface ParentHomeChildResponse {
   profileId: number
   nickname: string

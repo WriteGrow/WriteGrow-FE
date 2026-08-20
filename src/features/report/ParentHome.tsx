@@ -1,19 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
 import { getParentHome } from '../../lib/api'
+import { useAccountStore } from '../../stores/accountStore'
 import { ActivityCard } from './parent-home/ActivityCard'
 import { ErrorStats } from './parent-home/ErrorStats'
 import { FocusGuidance } from './parent-home/FocusGuidance'
 
 export function ParentHome() {
+  const parentProfileId = useAccountStore((s) => s.parentProfileId)
   const {
     data,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['parents', 'home'],
+    queryKey: ['parents', 'home', parentProfileId],
     queryFn: getParentHome,
+    enabled: parentProfileId !== null,
   })
-
   const children = data?.children
 
   return (

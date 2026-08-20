@@ -96,7 +96,8 @@ body {
 
 .child-theme .app-main section:not(.welcome-hero),
 .child-theme .app-main li > button,
-.child-theme .app-main li.rounded-\[10px\] {
+.child-theme .app-main li.rounded-\[10px\],
+.child-theme .profile-info-panel {
   border: 2px solid #e6f0f4 !important;
   border-radius: 22px !important;
   box-shadow: 0 5px 0 #dceaf0;

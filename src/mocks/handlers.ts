@@ -17,7 +17,10 @@ import type {
   WritingSubmitResponse,
   WritingSummaryResponse,
 } from '../lib/apiTypes'
-import { DEV_CHILD_ID, DEV_CHILD_PROFILE_ID } from '../lib/devChild'
+import { DEV_CHILD_ID } from '../lib/devChild'
+
+// 목(MSW) 전용. 예전 DEV_CHILD_PROFILE_ID 상수가 쓰던 값을 그대로 리터럴로 유지한다.
+const MOCK_CHILD_PROFILE_ID = 1
 import {
   analyzePost,
   children,
@@ -70,6 +73,8 @@ interface MockWriting {
 
 const mockWritings = new Map<number, MockWriting>()
 let nextMockWritingId = 1
+let nextMockAccountId = 1
+let nextMockProfileId = 1
 
 function inputTypeFor(mode: 'pen' | 'keyboard'): WritingInputType {
   return mode === 'pen' ? 'PEN' : 'KEYBOARD'
@@ -156,7 +161,7 @@ function toSummary(writing: MockWriting): WritingSummaryResponse {
 function toDetail(writing: MockWriting): WritingDetailResponse {
   return {
     writingId: writing.writingId,
-    profileId: DEV_CHILD_PROFILE_ID,
+    profileId: MOCK_CHILD_PROFILE_ID,
     inputType: writing.inputType,
     status: writing.status,
     topic: writing.topic,
@@ -591,13 +596,54 @@ export const handlers = [
     return HttpResponse.json(children)
   }),
 
+  http.post('/api/accounts', async ({ request }) => {
+    let body: { name?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const name = typeof body.name === 'string' ? body.name : ''
+    const accountId = nextMockAccountId++
+    return HttpResponse.json(
+      { success: true, data: { id: accountId, name, createdAt: new Date().toISOString() } },
+      { status: 201 },
+    )
+  }),
+
+  http.post('/api/accounts/:accountId/profiles', async ({ params, request }) => {
+    let body: { role?: unknown; nickname?: unknown; birthYear?: unknown } = {}
+    try {
+      body = (await request.json()) as typeof body
+    } catch {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    const role = body.role === 'PARENTS' || body.role === 'CHILD' ? body.role : 'CHILD'
+    const nickname = typeof body.nickname === 'string' ? body.nickname : ''
+    const birthYear = typeof body.birthYear === 'number' ? body.birthYear : new Date().getFullYear()
+    const profileId = nextMockProfileId++
+    return HttpResponse.json(
+      {
+        success: true,
+        data: {
+          id: profileId,
+          accountId: Number(params.accountId),
+          role,
+          nickname,
+          birthYear,
+          consentConfirmed: false,
+        },
+      },
+      { status: 201 },
+    )
+  }),
+
+  // 온보딩으로 만들어진 프로필 ID는 매 세션 새로 발급되므로(1, 2고정이 아님)
+  // 특정 값만 허용하지 않고 헤더 존재 여부만 검사한다.
   http.get('/api/parents/home', ({ request }) => {
     const profileId = request.headers.get('X-Profile-Id')
     if (!profileId) {
       return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
-    }
-    if (profileId !== '1' && profileId !== '2') {
-      return failure(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다.')
     }
     return success({
       accountId: 1,
