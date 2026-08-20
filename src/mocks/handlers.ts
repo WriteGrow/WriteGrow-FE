@@ -481,8 +481,18 @@ export const handlers = [
     return HttpResponse.json(children)
   }),
 
-  http.get('/api/parent/home', () => {
-    return HttpResponse.json(parentHomeSummaries)
+  http.get('/api/parents/home', ({ request }) => {
+    const profileId = request.headers.get('X-Profile-Id')
+    if (!profileId) {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+    if (profileId !== '1' && profileId !== '2') {
+      return failure(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다.')
+    }
+    return success({
+      accountId: 1,
+      children: parentHomeSummaries,
+    })
   }),
 
   http.get('/api/children/:childId/posts', ({ params }) => {

@@ -1,10 +1,11 @@
-import { DEV_CHILD_PROFILE_ID } from './devChild'
+import { DEV_CHILD_PROFILE_ID, DEV_PARENT_PROFILE_ID } from './devChild'
 import type {
   ApiErrorBody,
   AnalysisResponse,
   ErrorResponse,
   HandwritingImageUploadResponse,
   PageResponse,
+  ParentHomeResponse,
   StrokeBatchAppendResponse,
   StrokeData,
   WritingCreateResponse,
@@ -74,7 +75,9 @@ async function readJson(response: Response): Promise<unknown> {
 
 async function fetchJson(path: string, init: RequestInit = {}): Promise<{ response: Response; body: unknown }> {
   const headers = new Headers(init.headers)
-  headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
+  if (!headers.has('X-Profile-Id')) {
+    headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
+  }
   if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
@@ -184,5 +187,11 @@ export async function confirmText(
 export async function rewriteWriting(writingId: number): Promise<WritingCreateResponse> {
   return request<WritingCreateResponse>(`/api/writings/${writingId}/rewrite`, {
     method: 'POST',
+  })
+}
+
+export async function getParentHome(): Promise<ParentHomeResponse> {
+  return request<ParentHomeResponse>('/api/parents/home', {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
   })
 }

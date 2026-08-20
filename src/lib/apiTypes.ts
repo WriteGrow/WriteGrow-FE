@@ -172,3 +172,22 @@ export interface WritingErrorsResponse {
   analyzedAt: string | null
   failureReason: string | null
 }
+
+export interface ParentHomeChildResponse {
+  profileId: number
+  nickname: string
+  age: number
+  weeklyWritingCount: number
+  selfCorrectionCount: number
+  writingStreakDays: number
+  recentWritingId: number | null
+  recentWritingPreview: string | null
+  topErrorTypes: WritingErrorType[]
+  weeklyErrorCount: number
+  errorCountDelta: number
+}
+
+export interface ParentHomeResponse {
+  accountId: number
+  children: ParentHomeChildResponse[]
+}
