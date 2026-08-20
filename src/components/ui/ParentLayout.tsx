@@ -22,9 +22,13 @@ export function ParentLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex h-svh overflow-hidden bg-[#f3f4f6]">
-      <aside className="flex h-full w-44 shrink-0 flex-col border-r border-ink/10 bg-white px-3 py-5">
-        <p className="mb-6 px-2 text-lg font-bold tracking-tight text-black">글쑥쑥</p>
+    <div className="parent-theme flex h-svh overflow-hidden bg-[#f3f4f6]">
+      <aside className="parent-sidebar flex h-full w-44 shrink-0 flex-col border-r border-ink/10 bg-white px-3 py-5">
+        <div className="parent-brand mb-6 px-2">
+          <span aria-hidden>●</span>
+          <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+          <p>보호자 리포트</p>
+        </div>
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             if (item.role === 'child') {
@@ -46,7 +50,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      'rounded-md px-3 py-2.5 text-sm',
+                      'parent-nav-item rounded-md px-3 py-2.5 text-sm',
                       isActive
                         ? 'bg-black font-semibold text-white'
                         : 'text-black/80 hover:bg-black/5',
@@ -71,7 +75,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="relative z-20 flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
+        <header className="parent-header relative z-20 flex min-h-14 shrink-0 items-center justify-end gap-3 border-b border-black/10 bg-white px-6">
           <label className="relative w-full max-w-xs">
             <span className="sr-only">검색</span>
             <FiSearch
@@ -88,7 +92,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
           <ProfileInfo />
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="parent-main min-h-0 flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   )

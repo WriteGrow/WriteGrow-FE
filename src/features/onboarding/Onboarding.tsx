@@ -107,14 +107,19 @@ export function Onboarding() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-[#f3f4f6] p-6">
-      <div className="w-full max-w-md rounded-[10px] border border-black/10 bg-white p-6 shadow-sm">
-        <p className="mb-1 text-[12px] font-medium text-black/50">
-          {mode === 'recover' ? '계정 불러오기' : `${step} / 3 단계`}
-        </p>
-        <p className="mb-6 text-lg font-bold tracking-tight text-black">WriteGrow</p>
+    <div className="onboarding-theme flex min-h-svh items-center justify-center bg-[#f3f4f6] p-6">
+      <div className="onboarding-scene">
+        <div className="onboarding-card w-full max-w-md rounded-[10px] border border-black/10 bg-white p-6 shadow-sm">
+          <div className="onboarding-brand mb-6">
+            <span aria-hidden>●</span>
+            <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+            <p>나의 글쓰기 놀이터</p>
+          </div>
+          <p className="onboarding-step mb-4 text-[12px] font-medium text-black/50">
+            {mode === 'recover' ? '계정 불러오기' : `${step} / 3 단계`}
+          </p>
 
-        {mode === 'recover' && (
+          {mode === 'recover' && (
           <div className="space-y-4">
             <div>
               <h1 className="mb-1 text-[16px] font-semibold text-black">이미 있는 가족 계정을 불러와요</h1>
@@ -148,9 +153,9 @@ export function Onboarding() {
               새로 계정 만들기로 돌아가기
             </button>
           </div>
-        )}
+          )}
 
-        {mode === 'create' && step === 1 && (
+          {mode === 'create' && step === 1 && (
           <div className="space-y-4">
             <div>
               <h1 className="mb-1 text-[16px] font-semibold text-black">우리 가족 이름을 알려주세요</h1>
@@ -182,9 +187,9 @@ export function Onboarding() {
               이미 계정이 있으신가요?
             </button>
           </div>
-        )}
+          )}
 
-        {mode === 'create' && step === 2 && (
+          {mode === 'create' && step === 2 && (
           <div className="space-y-4">
             <div>
               <h1 className="mb-1 text-[16px] font-semibold text-black">보호자 프로필을 만들어요</h1>
@@ -218,9 +223,9 @@ export function Onboarding() {
               {parentProfileMutation.isPending ? '만드는 중...' : '다음'}
             </button>
           </div>
-        )}
+          )}
 
-        {mode === 'create' && step === 3 && (
+          {mode === 'create' && step === 3 && (
           <div className="space-y-4">
             <div>
               <h1 className="mb-1 text-[16px] font-semibold text-black">아이 프로필을 만들어요</h1>
@@ -254,7 +259,14 @@ export function Onboarding() {
               {childProfileMutation.isPending ? '만드는 중...' : '시작하기'}
             </button>
           </div>
-        )}
+          )}
+        </div>
+
+        <div className="onboarding-friend" aria-hidden>
+          <img className="onboarding-hills" src="/writegrow-brainstorming-hills.png" alt="" />
+          <img className="onboarding-chick" src="/writegrow-chick-writing.png" alt="" />
+          <p>우리 같이 시작해 볼까?</p>
+        </div>
       </div>
     </div>
   )

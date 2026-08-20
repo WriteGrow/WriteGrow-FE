@@ -20,6 +20,180 @@ body {
   background: var(--color-surface);
 }
 
+/* Parent UI shares the child-home visual language, with quieter report cards. */
+.parent-theme {
+  --parent-ink: #17365d;
+  --parent-muted: #6d7f96;
+  --parent-blue: #47b8f5;
+  --parent-blue-soft: #edf9ff;
+  --parent-line: #cfe3ed;
+  color: var(--parent-ink);
+  background: #fffaf0;
+  font-family: 'Griun Fromsol', ui-rounded, "Apple SD Gothic Neo", sans-serif;
+  letter-spacing: -0.018em;
+}
+.parent-theme .parent-sidebar {
+  width: 200px;
+  border-right: 3px solid #dff2ff;
+  background: #fff;
+  padding: 24px 14px;
+}
+.parent-theme .parent-brand { position: relative; }
+.parent-theme .parent-brand > span { position: absolute; top: -8px; left: 86px; color: #63cf8b; font-size: 10px; }
+.parent-theme .parent-brand > p:first-of-type { color: var(--parent-ink); font-size: 25px; }
+.parent-theme .parent-brand > p:last-of-type { margin-top: 2px; color: var(--parent-muted); font-size: 14px; font-weight: 700; }
+.parent-theme .parent-sidebar nav > button,
+.parent-theme .parent-sidebar nav > span,
+.parent-theme .parent-nav-item { border-radius: 14px; font-size: 18px; font-weight: 700; }
+.parent-theme .parent-nav-item.bg-black { background: var(--parent-blue) !important; color: #fff; box-shadow: 0 4px 0 #1688c5; }
+.parent-theme .parent-sidebar nav > button:hover { background: #fff4c2; }
+.parent-theme .parent-header {
+  min-height: 56px;
+  border-bottom: 2px solid #e9f5fb;
+  background: #ffffffdd;
+  backdrop-filter: blur(12px);
+}
+.parent-theme .parent-header input {
+  border: 2px solid #d9ecf7;
+  border-radius: 999px;
+  background: #f7fcff;
+}
+.parent-theme .parent-header button { min-height: 40px; border-radius: 999px; font-size: 18px; font-weight: 700; }
+.parent-theme .parent-header .bg-black { border-color: var(--parent-blue) !important; background: var(--parent-blue) !important; box-shadow: 0 3px 0 #1688c5; }
+.parent-theme .profile-info-panel { border: 1px solid var(--parent-line); border-radius: 16px; box-shadow: 0 12px 30px #2437461a; }
+.parent-theme .parent-main {
+  background-color: #fffaf0;
+  background-image: radial-gradient(#ffd84d55 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  padding: 28px;
+}
+.parent-theme .parent-main > * { max-width: 1180px; margin-right: auto; margin-left: auto; }
+.parent-theme .parent-main h1 { color: var(--parent-ink); font-size: 26px; font-weight: 900; letter-spacing: -.04em; }
+.parent-theme .parent-main h2 { color: var(--parent-ink); font-size: 21px; font-weight: 900; }
+.parent-theme .parent-main h3 { color: var(--parent-ink); font-weight: 800; }
+.parent-theme .parent-main article.bg-white,
+.parent-theme .parent-main section.bg-white,
+.parent-theme .parent-main div.bg-white,
+.parent-theme .parent-main a.bg-white {
+  border-color: var(--parent-line) !important;
+  border-width: 2px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 5px 0 #dcecf3;
+}
+.parent-theme .parent-main .rounded-\[10px\] { border-radius: 18px !important; }
+.parent-theme .parent-main .rounded-\[8px\] { border-radius: 14px !important; }
+.parent-theme .parent-main .bg-\[\#f3f4f6\] { background: #f4fbff !important; }
+.parent-theme .parent-main button,
+.parent-theme .parent-main a { transition: border-color .15s ease, background-color .15s ease, transform .15s ease; }
+.parent-theme .parent-main button:hover:not(:disabled),
+.parent-theme .parent-main a:hover { transform: translateY(-1px); }
+.parent-theme .parent-main .bg-black {
+  border-color: var(--parent-blue) !important;
+  border-radius: 14px !important;
+  background: var(--parent-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 0 #1688c5;
+}
+.parent-theme .parent-main button.border,
+.parent-theme .parent-main a.border { border: 2px solid var(--parent-line) !important; border-radius: 14px !important; background: #fff; }
+.parent-theme .parent-main input,
+.parent-theme .parent-main textarea,
+.parent-theme .parent-main select {
+  border: 2px solid var(--parent-line) !important;
+  border-radius: 14px !important;
+  background: #fffef8;
+  outline: none;
+}
+.parent-theme .parent-main input:focus,
+.parent-theme .parent-main textarea:focus,
+.parent-theme .parent-main select:focus { border-color: var(--parent-blue) !important; box-shadow: 0 0 0 3px #47b8f522; }
+.parent-theme .parent-main table { color: #324c5d; }
+.parent-theme .parent-main thead tr { border-color: var(--parent-line); background: #edf9ff !important; color: #5f748b !important; }
+.parent-theme .parent-main tbody tr { border-color: #e5edf1; }
+.parent-theme .parent-main tbody tr:hover { background: #fffdf6; }
+.parent-theme .parent-main .bg-amber-50 { border-color: #ead9ad !important; background: #fffaf0 !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[10px\] { font-size: 12px !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[11px\] { font-size: 13px !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[12px\] { font-size: 14px !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[14px\] { font-size: 16px !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[16px\] { font-size: 18px !important; }
+.parent-theme .parent-main :is(article, section, li, div, a).bg-white .text-\[18px\] { font-size: 20px !important; }
+
+.onboarding-theme {
+  position: relative;
+  overflow: hidden;
+  background-color: #fffaf0;
+  background-image: radial-gradient(#ffd84d55 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  font-family: 'Griun Fromsol', ui-rounded, "Apple SD Gothic Neo", sans-serif;
+}
+.onboarding-theme::before,
+.onboarding-theme::after { position: absolute; content: ''; border-radius: 50%; background: #9edcf033; }
+.onboarding-theme::before { width: 320px; height: 320px; top: -130px; left: -100px; }
+.onboarding-theme::after { width: 240px; height: 240px; right: -80px; bottom: -100px; background: #ffd96633; }
+.onboarding-theme .onboarding-scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(880px, 100%);
+  align-items: flex-end;
+  justify-content: center;
+  gap: 34px;
+}
+.onboarding-theme .onboarding-card {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 448px;
+  border: 3px solid #dff2ff;
+  border-radius: 24px;
+  box-shadow: 0 8px 0 #cceaf8, 0 18px 50px #365a6c14;
+  padding: 30px;
+}
+.onboarding-theme .onboarding-brand { position: relative; }
+.onboarding-theme .onboarding-brand > span { position: absolute; top: -8px; left: 86px; color: #63cf8b; font-size: 10px; }
+.onboarding-theme .onboarding-brand > p:first-of-type { color: #17365d; font-size: 25px; line-height: 1.2; font-weight: 700; }
+.onboarding-theme .onboarding-brand > p:last-of-type { margin-top: 2px; color: #6d7f96; font-size: 14px; font-weight: 700; }
+.onboarding-theme .onboarding-step {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #fff4c2;
+  padding: 5px 10px;
+  color: #8b6b16;
+  font-size: 14px;
+  font-weight: 800;
+}
+.onboarding-theme h1 { color: #17365d; font-size: 24px; font-weight: 900; }
+.onboarding-theme p { line-height: 1.55; }
+.onboarding-theme input {
+  border-color: #cbdfe8 !important;
+  border-radius: 12px !important;
+  background: #fafdff;
+  font-size: 16px;
+}
+.onboarding-theme input:focus { border-color: #4a8aaa !important; box-shadow: 0 0 0 3px #4a8aaa17; }
+.onboarding-theme button { border-radius: 14px !important; font-size: 16px; font-weight: 800; }
+.onboarding-theme button.bg-black { border-color: #47b8f5 !important; background: #47b8f5 !important; box-shadow: 0 4px 0 #1688c5; }
+.onboarding-theme .onboarding-friend {
+  position: relative;
+  width: 270px;
+  min-height: 285px;
+  flex: 0 0 270px;
+  text-align: center;
+}
+.onboarding-theme .onboarding-hills { position: absolute; right: -35px; bottom: 15px; width: 340px; max-width: none; }
+.onboarding-theme .onboarding-chick { position: absolute; right: 48px; bottom: 42px; z-index: 1; width: 165px; }
+.onboarding-theme .onboarding-friend p { position: absolute; right: 20px; bottom: -3px; z-index: 2; width: 220px; color: #6d7f96; font-size: 16px; font-weight: 800; }
+
+@media (max-width: 760px) {
+  .onboarding-theme { align-items: flex-start; padding: 24px 16px; }
+  .onboarding-theme .onboarding-scene { flex-direction: column; align-items: center; gap: 18px; }
+  .onboarding-theme .onboarding-card { width: 100%; flex-basis: auto; padding: 24px; }
+  .onboarding-theme .onboarding-friend { width: 220px; min-height: 170px; flex-basis: 170px; }
+  .onboarding-theme .onboarding-hills { right: -25px; bottom: 10px; width: 270px; }
+  .onboarding-theme .onboarding-chick { right: 47px; bottom: 28px; width: 118px; }
+  .onboarding-theme .onboarding-friend p { right: 0; bottom: -4px; width: 220px; font-size: 14px; }
+}
+
 /* Child UI theme: visual styling only. Parent routes keep the neutral product UI. */
 .child-theme {
   --kid-navy: #17365d;
@@ -63,7 +237,17 @@ body {
   backdrop-filter: blur(12px);
 }
 .child-theme .app-header input { border: 2px solid #d9ecf7; border-radius: 999px; background: #f7fcff; }
-.child-theme .app-header button { border-radius: 999px; font-weight: 700; }
+.child-theme .app-header button { min-height: 40px; border-radius: 999px; font-size: 18px !important; font-weight: 700; }
+.child-theme .app-header .bg-black { border-color: var(--kid-blue) !important; background: var(--kid-blue) !important; box-shadow: 0 3px 0 #1688c5; }
+
+.parent-theme .parent-header input,
+.child-theme .app-header input { font-size: 18px !important; }
+.parent-theme .parent-brand > p:first-of-type,
+.child-theme .brand-lockup > p:first-of-type {
+  font-size: 25px !important;
+  line-height: 1.2;
+  font-weight: 700;
+}
 .child-theme .app-main {
   background-color: #fffaf0;
   background-image: radial-gradient(#ffd84d55 1.5px, transparent 1.5px);
