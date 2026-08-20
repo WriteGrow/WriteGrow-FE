@@ -26,7 +26,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
       <aside className="parent-sidebar flex h-full w-44 shrink-0 flex-col border-r border-ink/10 bg-white px-3 py-5">
         <div className="parent-brand mb-6 px-2">
           <span aria-hidden>●</span>
-          <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+          <p className="text-lg font-bold tracking-tight text-black">하루 한글</p>
           <p>보호자 리포트</p>
         </div>
         <nav className="flex flex-col gap-1">

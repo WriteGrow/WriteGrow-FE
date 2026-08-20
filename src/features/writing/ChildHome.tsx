@@ -61,7 +61,7 @@ export function ChildHome() {
           <h1>상상 톡톡, 글쓰기 시작!</h1>
           <p>네 이야기를 들려줘. 틀려도 괜찮아!</p>
         </div>
-        <img src="/writegrow-buddies-flat.png" alt="연필과 책을 든 WriteGrow 글쓰기 친구들" />
+        <img src="/writegrow-buddies-flat.png" alt="연필과 책을 든 하루 한글 글쓰기 친구들" />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">

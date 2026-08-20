@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="app-sidebar flex h-full w-44 shrink-0 flex-col border-r border-black/10 bg-white px-3 py-5">
         <div className="brand-lockup mb-6 px-2">
           <span className="brand-sprout" aria-hidden>●</span>
-          <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+          <p className="text-lg font-bold tracking-tight text-black">하루 한글</p>
           {isChildPage && <p className="brand-caption">나의 글쓰기 놀이터</p>}
         </div>
         <nav className="flex flex-col gap-1">

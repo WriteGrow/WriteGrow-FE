@@ -39,7 +39,7 @@ body {
   padding: 24px 14px;
 }
 .parent-theme .parent-brand { position: relative; }
-.parent-theme .parent-brand > span { position: absolute; top: -8px; left: 86px; color: #63cf8b; font-size: 10px; }
+.parent-theme .parent-brand > span { position: absolute; top: -8px; left: 78px; color: #63cf8b; font-size: 10px; }
 .parent-theme .parent-brand > p:first-of-type { color: var(--parent-ink); font-size: 25px; }
 .parent-theme .parent-brand > p:last-of-type { margin-top: 2px; color: var(--parent-muted); font-size: 14px; font-weight: 700; }
 .parent-theme .parent-sidebar nav > button,
@@ -150,7 +150,7 @@ body {
   padding: 30px;
 }
 .onboarding-theme .onboarding-brand { position: relative; }
-.onboarding-theme .onboarding-brand > span { position: absolute; top: -8px; left: 86px; color: #63cf8b; font-size: 10px; }
+.onboarding-theme .onboarding-brand > span { position: absolute; top: -8px; left: 78px; color: #63cf8b; font-size: 10px; }
 .onboarding-theme .onboarding-brand > p:first-of-type { color: #17365d; font-size: 25px; line-height: 1.2; font-weight: 700; }
 .onboarding-theme .onboarding-brand > p:last-of-type { margin-top: 2px; color: #6d7f96; font-size: 14px; font-weight: 700; }
 .onboarding-theme .onboarding-step {
@@ -219,7 +219,7 @@ body {
 
 .child-theme .brand-lockup { position: relative; }
 .child-theme .brand-lockup > p:first-of-type { color: var(--kid-navy); font-size: 21px; }
-.child-theme .brand-sprout { position: absolute; left: 86px; top: -8px; color: #63cf8b; font-size: 10px; }
+.child-theme .brand-sprout { position: absolute; left: 78px; top: -8px; color: #63cf8b; font-size: 10px; }
 .child-theme .brand-caption { margin-top: 2px; color: #6d7f96; font-size: 10px; font-weight: 700; }
 .child-theme .nav-item,
 .child-theme .app-sidebar nav > button,

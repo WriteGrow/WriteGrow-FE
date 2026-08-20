@@ -112,7 +112,7 @@ export function Onboarding() {
         <div className="onboarding-card w-full max-w-md rounded-[10px] border border-black/10 bg-white p-6 shadow-sm">
           <div className="onboarding-brand mb-6">
             <span aria-hidden>●</span>
-            <p className="text-lg font-bold tracking-tight text-black">WriteGrow</p>
+            <p className="text-lg font-bold tracking-tight text-black">하루 한글</p>
             <p>나의 글쓰기 놀이터</p>
           </div>
           <p className="onboarding-step mb-4 text-[12px] font-medium text-black/50">
