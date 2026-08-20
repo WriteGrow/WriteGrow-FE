@@ -213,3 +213,7 @@ export async function createProfile(accountId: number, input: ProfileCreateReque
 export async function getParentHome(parentProfileId: number): Promise<ParentHomeResponse> {
   return request<ParentHomeResponse>('/api/parents/home', {}, parentProfileId)
 }
+
+export async function getAccountProfiles(accountId: number): Promise<ProfileResponse[]> {
+  return request<ProfileResponse[]>(`/api/accounts/${accountId}/profiles`)
+}
