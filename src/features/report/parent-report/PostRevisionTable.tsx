@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { getWritings } from '../../../lib/api'
+import { getChildWritings } from '../../../lib/api'
 import type { WritingStatus, WritingSummaryResponse } from '../../../lib/apiTypes'
 
 const STATUS_LABELS: Record<WritingStatus, string> = {
@@ -56,8 +56,8 @@ function WritingRows({
 
 export function PostRevisionTable({ childProfileId }: { childProfileId: number }) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['writings', 'parent-report', childProfileId],
-    queryFn: () => getWritings({ page: 0, size: 10, profileId: childProfileId }),
+    queryKey: ['children', childProfileId, 'writings', { page: 0, size: 10 }],
+    queryFn: () => getChildWritings(childProfileId, { page: 0, size: 10 }),
   })
 
   const writings = data?.content ?? []

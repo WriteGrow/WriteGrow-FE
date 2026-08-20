@@ -29,9 +29,12 @@ export function ActivityCard({ child }: { child: ParentHomeChild }) {
             최근 글 : {child.recentWritingPreview ?? '아직 작성한 글이 없어요'}
           </span>
         </p>
-        <button type="button" className="shrink-0 text-black underline-offset-2 hover:underline">
+        <Link
+          to={`/parent/children/${child.profileId}/writings`}
+          className="shrink-0 text-black underline-offset-2 hover:underline"
+        >
           글 기록 보기
-        </button>
+        </Link>
       </div>
 
       <Link

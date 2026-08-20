@@ -595,6 +595,35 @@ export const handlers = [
     return success(report)
   }),
 
+  http.get('/api/children/:childProfileId/writings', ({ params, request }) => {
+    const profileHeader = request.headers.get('X-Profile-Id')
+    if (!profileHeader) {
+      return failure(400, 'MISSING_PROFILE_HEADER', 'X-Profile-Id 헤더가 필요합니다.')
+    }
+
+    const childProfileId = Number(params.childProfileId)
+    if (!Number.isFinite(childProfileId)) {
+      return failure(400, 'INVALID_REQUEST', '요청 값이 올바르지 않습니다.')
+    }
+
+    const url = new URL(request.url)
+    const page = Math.max(0, Number(url.searchParams.get('page') ?? 0))
+    const size = Math.max(1, Number(url.searchParams.get('size') ?? 20))
+    const childId = `child-${childProfileId}`
+    const allContent = postsByChild(childId).map((post) => toSummary(ensureMockWriting(post)))
+    const content = allContent.slice(page * size, page * size + size)
+    const totalPages = Math.ceil(allContent.length / size)
+    const data: PageResponse<WritingSummaryResponse> = {
+      content,
+      page,
+      size,
+      totalElements: allContent.length,
+      totalPages,
+      last: totalPages === 0 || page >= totalPages - 1,
+    }
+    return success(data)
+  }),
+
   http.get('/api/children/:childProfileId/writings/:writingId', ({ params, request }) => {
     const profileHeader = request.headers.get('X-Profile-Id')
     if (!profileHeader) {

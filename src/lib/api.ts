@@ -215,6 +215,18 @@ export async function getChildWeeklyReport(
   })
 }
 
+export async function getChildWritings(
+  childProfileId: number,
+  options: { page?: number; size?: number } = {},
+): Promise<PageResponse<WritingSummaryResponse>> {
+  const page = options.page ?? 0
+  const size = options.size ?? 20
+  return request<PageResponse<WritingSummaryResponse>>(
+    `/api/children/${childProfileId}/writings?page=${page}&size=${size}`,
+    { headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) } },
+  )
+}
+
 export async function getChildWriting(
   childProfileId: number,
   writingId: number,
