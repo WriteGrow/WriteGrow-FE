@@ -1,22 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
-import type { ParentChildSummary } from '../../mocks/seed'
+import { getParentHome } from '../../lib/api'
 import { ActivityCard } from './parent-home/ActivityCard'
 import { ErrorStats } from './parent-home/ErrorStats'
 import { FocusGuidance } from './parent-home/FocusGuidance'
 
 export function ParentHome() {
   const {
-    data: summaries,
+    data,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['parent', 'home'],
-    queryFn: async (): Promise<ParentChildSummary[]> => {
-      const res = await fetch('/api/parent/home')
-      if (!res.ok) throw new Error('failed to load parent home')
-      return res.json()
-    },
+    queryKey: ['parents', 'home'],
+    queryFn: getParentHome,
   })
+
+  const children = data?.children
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -31,24 +29,28 @@ export function ParentHome() {
         {isLoading && <p className="text-[14px] text-black/50">불러오는 중...</p>}
         {isError && <p className="text-[14px] text-red-700">요약을 불러오지 못했어요.</p>}
 
-        {summaries && (
+        {children && children.length === 0 && (
+          <p className="text-[14px] text-black/50">연결된 아동이 아직 없어요.</p>
+        )}
+
+        {children && children.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2">
-            {summaries.map((child) => (
-              <ActivityCard key={child.childId} child={child} />
+            {children.map((child) => (
+              <ActivityCard key={child.profileId} child={child} />
             ))}
           </div>
         )}
       </section>
 
-      {summaries && (
+      {children && children.length > 0 && (
         <>
           <section>
             <h2 className="mb-4 text-[16px] font-semibold text-black">
               오류 변화 추이 및 자기교정 현황
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
-              {summaries.map((child) => (
-                <ErrorStats key={child.childId} child={child} />
+              {children.map((child) => (
+                <ErrorStats key={child.profileId} child={child} />
               ))}
             </div>
           </section>
@@ -56,8 +58,8 @@ export function ParentHome() {
           <section>
             <h2 className="mb-4 text-[16px] font-semibold text-black">지도 우선순위 안내</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              {summaries.map((child) => (
-                <FocusGuidance key={child.childId} child={child} />
+              {children.map((child) => (
+                <FocusGuidance key={child.profileId} child={child} />
               ))}
             </div>
           </section>

@@ -1,6 +1,10 @@
-import type { ParentReviewData } from '../../../mocks/seed'
-
-export function ReviewSummaryCards({ review }: { review: ParentReviewData }) {
+export function ReviewSummaryCards({
+  reviewCount,
+  confirmedCount,
+}: {
+  reviewCount: number
+  confirmedCount: number
+}) {
   return (
     <section className="space-y-4">
       <div>
@@ -13,17 +17,15 @@ export function ReviewSummaryCards({ review }: { review: ParentReviewData }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <article className="rounded-[10px] border border-black/10 bg-white p-4">
           <p className="text-[12px] text-black/50">검토 대상</p>
-          <p className="mt-2 text-[18px] font-bold text-black">{review.reviewTargetCount}건</p>
+          <p className="mt-2 text-[18px] font-bold text-black">{reviewCount}건</p>
         </article>
         <article className="rounded-[10px] border border-black/10 bg-white p-4">
           <p className="text-[12px] text-black/50">확정 오류</p>
-          <p className="mt-2 text-[18px] font-bold text-black">{review.confirmedErrorCount}건</p>
+          <p className="mt-2 text-[18px] font-bold text-black">{confirmedCount}건</p>
         </article>
         <article className="rounded-[10px] border border-black/10 bg-white p-4">
           <p className="text-[12px] text-black/50">자동 반영 여부</p>
-          <p className="mt-2 text-[18px] font-bold text-black">
-            {review.autoApplied ? '반영됨' : '반영 안 됨'}
-          </p>
+          <p className="mt-2 text-[18px] font-bold text-black">반영 안 됨</p>
         </article>
       </div>
     </section>

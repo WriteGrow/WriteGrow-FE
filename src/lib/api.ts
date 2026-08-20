@@ -1,10 +1,15 @@
-import { DEV_CHILD_PROFILE_ID } from './devChild'
+import { DEV_CHILD_PROFILE_ID, DEV_PARENT_PROFILE_ID } from './devChild'
 import type {
   ApiErrorBody,
   AnalysisResponse,
   ErrorResponse,
   HandwritingImageUploadResponse,
   PageResponse,
+  ParentHomeResponse,
+  ParentWritingDetailResponse,
+  ChildErrorProfileResponse,
+  AggregatedChildErrorReview,
+  WritingErrorReviewResponse,
   StrokeBatchAppendResponse,
   StrokeData,
   WritingCreateResponse,
@@ -14,6 +19,7 @@ import type {
   WritingSubmitResponse,
   WritingTextConfirmResponse,
   WritingSummaryResponse,
+  WeeklyReportResponse,
 } from './apiTypes'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '')
@@ -74,7 +80,9 @@ async function readJson(response: Response): Promise<unknown> {
 
 async function fetchJson(path: string, init: RequestInit = {}): Promise<{ response: Response; body: unknown }> {
   const headers = new Headers(init.headers)
-  headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
+  if (!headers.has('X-Profile-Id')) {
+    headers.set('X-Profile-Id', String(DEV_CHILD_PROFILE_ID))
+  }
   if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
@@ -108,10 +116,17 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body.data
 }
 
-export async function getWritings(options: { page?: number; size?: number } = {}): Promise<PageResponse<WritingSummaryResponse>> {
+export async function getWritings(
+  options: { page?: number; size?: number; profileId?: number } = {},
+): Promise<PageResponse<WritingSummaryResponse>> {
   const page = options.page ?? 0
   const size = options.size ?? 5
-  return request<PageResponse<WritingSummaryResponse>>(`/api/writings?page=${page}&size=${size}`)
+  const headers = options.profileId
+    ? { 'X-Profile-Id': String(options.profileId) }
+    : undefined
+  return request<PageResponse<WritingSummaryResponse>>(`/api/writings?page=${page}&size=${size}`, {
+    ...(headers ? { headers } : {}),
+  })
 }
 
 export async function getWriting(writingId: number): Promise<WritingDetailResponse> {
@@ -184,5 +199,101 @@ export async function confirmText(
 export async function rewriteWriting(writingId: number): Promise<WritingCreateResponse> {
   return request<WritingCreateResponse>(`/api/writings/${writingId}/rewrite`, {
     method: 'POST',
+  })
+}
+
+export async function getParentHome(): Promise<ParentHomeResponse> {
+  return request<ParentHomeResponse>('/api/parents/home', {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
+}
+
+export async function getChildWeeklyReport(
+  childProfileId: number,
+  options: { weekOf?: string } = {},
+): Promise<WeeklyReportResponse> {
+  const query = options.weekOf ? `?weekOf=${encodeURIComponent(options.weekOf)}` : ''
+  return request<WeeklyReportResponse>(`/api/children/${childProfileId}/weekly-report${query}`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
+}
+
+export async function getChildWritings(
+  childProfileId: number,
+  options: { page?: number; size?: number } = {},
+): Promise<PageResponse<WritingSummaryResponse>> {
+  const page = options.page ?? 0
+  const size = options.size ?? 20
+  return request<PageResponse<WritingSummaryResponse>>(
+    `/api/children/${childProfileId}/writings?page=${page}&size=${size}`,
+    { headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) } },
+  )
+}
+
+export async function getChildWriting(
+  childProfileId: number,
+  writingId: number,
+): Promise<ParentWritingDetailResponse> {
+  return request<ParentWritingDetailResponse>(
+    `/api/children/${childProfileId}/writings/${writingId}`,
+    { headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) } },
+  )
+}
+
+export async function getWritingErrorReview(writingId: number): Promise<WritingErrorReviewResponse> {
+  return request<WritingErrorReviewResponse>(`/api/writings/${writingId}/error-review`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
+  })
+}
+
+/** 자녀 전체 글의 error-review를 모아 낮은 확신도 후보를 합산한다. 분석 없는 글(404 등)은 건너뛴다. */
+export async function getChildErrorReviews(
+  childProfileId: number,
+): Promise<AggregatedChildErrorReview> {
+  const writings: WritingSummaryResponse[] = []
+  let page = 0
+  let last = false
+
+  while (!last) {
+    const response = await getChildWritings(childProfileId, { page, size: 50 })
+    writings.push(...response.content)
+    last = response.last || response.content.length === 0
+    page += 1
+    if (page > 20) break
+  }
+
+  const reviews = await Promise.all(
+    writings.map(async (writing) => {
+      try {
+        const review = await getWritingErrorReview(writing.writingId)
+        return { writing, review }
+      } catch {
+        return null
+      }
+    }),
+  )
+
+  const candidates = reviews.flatMap((entry) => {
+    if (!entry) return []
+    return entry.review.reviewCandidates.map((candidate) => ({
+      ...candidate,
+      writingId: entry.writing.writingId,
+      topic: entry.writing.topic,
+      analyzedText: entry.review.analyzedText,
+    }))
+  })
+
+  return {
+    reviewCount: candidates.length,
+    confirmedCount: reviews.reduce((total, entry) => total + (entry?.review.confirmedCount ?? 0), 0),
+    candidates,
+  }
+}
+
+export async function getChildErrorProfile(
+  childProfileId: number,
+): Promise<ChildErrorProfileResponse> {
+  return request<ChildErrorProfileResponse>(`/api/children/${childProfileId}/error-profile`, {
+    headers: { 'X-Profile-Id': String(DEV_PARENT_PROFILE_ID) },
   })
 }

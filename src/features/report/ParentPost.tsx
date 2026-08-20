@@ -1,21 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import type { ParentPostDetail } from '../../mocks/seed'
+import { getChildWriting } from '../../lib/api'
 import { PostChangeSummary } from './parent-post/PostChangeSummary'
 import { PostCompareSection } from './parent-post/PostCompareSection'
 import { PostMetaCard } from './parent-post/PostMetaCard'
 
 export function ParentPost() {
   const { childId = '', postId = '' } = useParams()
+  const childProfileId = Number(childId)
+  const writingId = Number(postId)
+  const idsValid = Number.isFinite(childProfileId) && Number.isFinite(writingId)
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['children', childId, 'posts', postId],
-    enabled: Boolean(childId && postId),
-    queryFn: async (): Promise<ParentPostDetail> => {
-      const res = await fetch(`/api/children/${childId}/posts/${postId}`)
-      if (!res.ok) throw new Error('failed to load post detail')
-      return res.json()
-    },
+    queryKey: ['children', childProfileId, 'writings', writingId],
+    enabled: idsValid,
+    queryFn: () => getChildWriting(childProfileId, writingId),
   })
 
   if (isLoading) {
@@ -28,9 +27,9 @@ export function ParentPost() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <PostMetaCard post={data} />
-      <PostCompareSection post={data} />
-      <PostChangeSummary post={data} />
+      <PostMetaCard writing={data} />
+      <PostCompareSection writing={data} />
+      <PostChangeSummary writing={data} />
       <div className="flex justify-end">
         <Link
           to={`/parent/children/${childId}/report`}
