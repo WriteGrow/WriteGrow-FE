@@ -40,6 +40,10 @@ function isStrokeNear(stroke: Stroke, x: number, y: number, radius: number): boo
 const PEN_CURSOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>`
 const PEN_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(PEN_CURSOR_SVG)}") 2 22, crosshair`
 
+// lucide "eraser" 아이콘. 지우개가 닿는 지점(좌하단 모서리)에 핫스팟을 맞춘다.
+const ERASER_CURSOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>`
+const ERASER_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(ERASER_CURSOR_SVG)}") 4 20, cell`
+
 // perfect-freehand 공식 렌더링 레시피: getStroke가 돌려주는 외곽선 점들을
 // 인접 점의 중점을 지나는 2차 베지어 경로로 이어 붙인다.
 function getSvgPathFromStroke(stroke: number[][]): string {
@@ -185,7 +189,7 @@ export function PenCanvas({
       <svg
         ref={svgRef}
         className="min-h-0 w-full flex-1 touch-none rounded-[10px] border border-black/10 bg-white"
-        style={{ cursor: tool === 'eraser' ? 'cell' : PEN_CURSOR }}
+        style={{ cursor: tool === 'eraser' ? ERASER_CURSOR : PEN_CURSOR }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
