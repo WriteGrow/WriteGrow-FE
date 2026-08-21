@@ -28,9 +28,9 @@ export function Result() {
       </section>
 
       {errors.length > 0 ? (
-        <section className="space-y-2">
+        <section className="correction-section space-y-2">
           <h2 className="text-[16px] font-semibold text-black">이번에 고친 것들</h2>
-          <ul className="space-y-2">
+          <ul className="correction-list space-y-2">
             {errors.map((error) => (
               <li
                 key={`${error.errorType}-${error.startIndex}`}
